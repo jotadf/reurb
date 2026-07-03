@@ -46,7 +46,12 @@ class ManterRelatorio extends Model {
      * Retorna todos os registros e colunas da tabela de Domicílios
      */
     public function listarDomicilios($filtro = '') {
+
         $sql = "SELECT * FROM domicilios $filtro ORDER BY numero_selo ASC";
+        if ($filtro == '') {
+            $sql = "SELECT d.*, s.data_formulario FROM domicilios as d, selagem_lotes as s WHERE d.id_submissao_pai = s.id_submissao ORDER BY d.numero_selo ASC";
+        }
+        
         $resultado = $this->db->Execute($sql);
         $array_dados = array();
         
@@ -65,6 +70,22 @@ class ManterRelatorio extends Model {
      */
     public function getDomicilioPorSelo($numero_selo) {
         $sql = "SELECT * FROM domicilios WHERE numero_selo = '" . $numero_selo . "'";
+        $resultado = $this->db->Execute($sql);
+        
+        $dados = new stdClass();
+        if ($registro = $resultado->fetchRow()) {
+            foreach ($registro as $coluna => $valor) {
+                $dados->$coluna = $valor;
+            }
+        }
+        return $dados;
+    }
+
+    /**
+     * Busca um Domicílio pelo ID de submissão do Lote Pai (Selagem)
+     */
+    public function getDomicilioPorSubmissaoPai($id_submissao_pai) {
+        $sql = "SELECT * FROM domicilios WHERE id_submissao_pai = " . (int)$id_submissao_pai . " LIMIT 1";
         $resultado = $this->db->Execute($sql);
         
         $dados = new stdClass();
@@ -99,6 +120,23 @@ class ManterRelatorio extends Model {
      */
     public function getSociojuridicoPorId($id_submissao) {
         $sql = "SELECT * FROM cadastro_sociojuridico WHERE id_submissao = " . (int)$id_submissao;
+        $resultado = $this->db->Execute($sql);
+        
+        $dados = new stdClass();
+        if ($registro = $resultado->fetchRow()) {
+            foreach ($registro as $coluna => $valor) {
+                $dados->$coluna = $valor;
+            }
+        }
+        return $dados;
+    }
+    
+    /**
+     * Busca o Cadastro Sociojurídico de uma família pelo Código do Selo
+     */
+    public function getSociojuridicoPorCodigoSelo($codigo_selo) {
+        // Protege a string simples com escape básico
+        $sql = "SELECT * FROM cadastro_sociojuridico WHERE codigo_selo = '" . $codigo_selo . "' LIMIT 1";
         $resultado = $this->db->Execute($sql);
         
         $dados = new stdClass();

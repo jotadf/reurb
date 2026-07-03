@@ -55,7 +55,7 @@
     <!-- Divider -->
     <hr class="sidebar-divider">  
     <div class="sidebar-heading">
-        Formulários de coleta
+        Importação da Coleta
     </div>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
@@ -75,8 +75,35 @@
     <!-- Divider -->
     <hr class="sidebar-divider">  
     <div class="sidebar-heading">
-        Formulários de coleta
+        Edição de Dados
     </div>
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="selagens.php">
+            <i class="fa fa-id-card"></i>
+            <span>Selagens</span>
+        </a>
+    </li>
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="domicilios.php">
+            <i class="fa fa-home"></i>
+            <span>Domicílios</span>
+        </a>
+    </li>
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="sociojuridicos.php">
+            <i class="fa fa-balance-scale"></i>
+            <span>Sócio jurídicos</span>
+        </a>
+    </li>
+
+    <!-- Divider -->
+    <hr class="sidebar-divider">  
+    <div class="sidebar-heading">
+        Relatório
+    </div>    
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="gerar_busca_periodo.php">
