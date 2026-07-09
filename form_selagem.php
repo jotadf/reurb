@@ -295,7 +295,7 @@
                         <label for="foto_decl" class="required">Foto da Declaração de Ciência e Adesão</label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="foto_decl" name="foto_decl" accept="image/*" required>
-                            <label class="custom-file-label" for="foto_decl">Upload arquivo (<10MB)</label>
+                            <label class="custom-file-label" for="foto_decl">Upload arquivo (10MB)</label>
                         </div>
                     </div>
                 </div>
@@ -320,7 +320,7 @@
                         <label for="foto_lgpd" class="required">Foto do termo LGPD</label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="foto_lgpd" name="foto_lgpd" accept="image/*" required>
-                            <label class="custom-file-label" for="foto_lgpd">Upload arquivo (<10MB)</label>
+                            <label class="custom-file-label" for="foto_lgpd">Upload arquivo (10MB)</label>
                         </div>
                     </div>
                 </div>
@@ -361,7 +361,7 @@
                         <label for="foto_fachada" class="required">Foto da Fachada do Imóvel</label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="foto_fachada" name="foto_fachada" accept="image/*" required>
-                            <label class="custom-file-label" for="foto_fachada">Upload arquivo (<10MB)</label>
+                            <label class="custom-file-label" for="foto_fachada">Upload arquivo (10MB)</label>
                         </div>
                     </div>
                 </div>
@@ -370,7 +370,7 @@
                         <label for="foto_selo" class="required">Foto da Fachada com Selo Fixado</label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="foto_selo" name="foto_selo" accept="image/*" required>
-                            <label class="custom-file-label" for="foto_selo">Upload arquivo (<10MB)</label>
+                            <label class="custom-file-label" for="foto_selo">Upload arquivo (10MB)</label>
                         </div>
                     </div>
                 </div>
@@ -382,7 +382,7 @@
                         <label for="foto_ocupacao" class="required">Foto Comprovando Ocupação</label>
                         <div class="custom-file">
                             <input type="file" class="custom-file-input" id="foto_ocupacao" name="foto_ocupacao" accept="image/*" required>
-                            <label class="custom-file-label" for="foto_ocupacao">Upload arquivo (<10MB)</label>
+                            <label class="custom-file-label" for="foto_ocupacao">Upload arquivo (10MB)</label>
                         </div>
                     </div>
                 </div>

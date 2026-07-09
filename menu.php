@@ -9,39 +9,33 @@
         <div class="sidebar-brand-text mx-1">REURB</div>
     </a>
 
-    <?php
-    if ($usuario_logado->perfil <= 1) {
-        ?>
+
         <!-- Divider -->
         <hr class="sidebar-divider my-0">
 
         <!-- Divider -->
         <hr class="sidebar-divider">
-
+    <?php
+    if ($usuario_logado->perfil < 2) {
+        ?>
         <!-- Heading -->
         <div class="sidebar-heading">
             Gestão de Acesso
-        </div>
-        <?php
-        if ($usuario_logado->perfil <= 1) {
-            ?>        
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="perfis.php">
-                    <i class="fa fa-id-card"></i>
-                    <span>Perfis</span>
-                </a>
-            </li>
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item">
-                <a class="nav-link collapsed" href="equipes.php">
-                    <i class="fa fa-users"></i>
-                    <span>Equipes</span>
-                </a>
-            </li>
-            <?php
-        }
-        ?>        
+        </div>      
+        <!-- Nav Item - Pages Collapse Menu -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="perfis.php">
+                <i class="fa fa-id-card"></i>
+                <span>Perfis</span>
+            </a>
+        </li>
+        <!-- Nav Item - Pages Collapse Menu -->
+        <li class="nav-item">
+            <a class="nav-link collapsed" href="equipes.php">
+                <i class="fa fa-users"></i>
+                <span>Equipes</span>
+            </a>
+        </li>      
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
             <a class="nav-link collapsed" href="usuarios.php">
@@ -49,8 +43,9 @@
                 <span>Usuários</span>
             </a>
         </li>
-        <?php
-    }
+   <?php
+    } 
+    if ($usuario_logado->perfil <= 3) {
     ?>
     <!-- Divider -->
     <hr class="sidebar-divider">  
@@ -98,7 +93,17 @@
             <span>Sócio jurídicos</span>
         </a>
     </li>
-
+    <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="sociojuridicos.php">
+            <i class="fa fa-building"></i>
+            <span>Caracterizações</span>
+        </a>
+    </li>
+     <?php
+    } 
+    if ($usuario_logado->perfil <= 4) {
+    ?>  
     <!-- Divider -->
     <hr class="sidebar-divider">  
     <div class="sidebar-heading">
@@ -118,3 +123,5 @@
     </div>
 </ul>
 <!-- End of Sidebar -->
+ <?php
+    }

@@ -22,10 +22,10 @@ class ManterUsuario extends Model {
                 $dados->excluir = false;
             }
             $dados->id = $registro["id"];
-            $dados->nome = utf8_encode($registro["nome"]);
-            $dados->cpf = utf8_encode($registro["cpf"]);
-            $dados->senha = utf8_encode($registro["senha"]);
-            $dados->email = utf8_encode($registro["email"]);
+            $dados->nome = $registro["nome"];
+            $dados->cpf = $registro["cpf"];
+            $dados->senha = $registro["senha"];
+            $dados->email = $registro["email"];
             $dados->ativo = $registro["ativo"];
             $dados->equipe = $registro["id_equipe"];
             $dados->perfil = $registro["id_perfil"];
@@ -41,10 +41,10 @@ class ManterUsuario extends Model {
         $dados = new Usuario();
         while ($registro = $resultado->fetchRow()) {
             $dados->id = $registro["id"];
-            $dados->nome = utf8_encode($registro["nome"]);
-            $dados->cpf = utf8_encode($registro["cpf"]);
-            $dados->senha = utf8_encode($registro["senha"]);
-            $dados->email = utf8_encode($registro["email"]);
+            $dados->nome = $registro["nome"];
+            $dados->cpf = $registro["cpf"];
+            $dados->senha = $registro["senha"];
+            $dados->email = $registro["email"];
             $dados->ativo = $registro["ativo"];
             $dados->equipe = $registro["id_equipe"];
             $dados->perfil = $registro["id_perfil"];
@@ -58,10 +58,10 @@ class ManterUsuario extends Model {
         $dados = new Usuario();
         while ($registro = $resultado->fetchRow()) {
             $dados->id = $registro["id"];
-            $dados->nome = utf8_encode($registro["nome"]);
-            $dados->cpf = utf8_encode($registro["cpf"]);
-            $dados->senha = utf8_encode($registro["senha"]);
-            $dados->email = utf8_encode($registro["email"]);
+            $dados->nome = $registro["nome"];
+            $dados->cpf = $registro["cpf"];
+            $dados->senha = $registro["senha"];
+            $dados->email = $registro["email"];
             $dados->ativo = $registro["ativo"];
             $dados->equipe = $registro["id_equipe"];
             $dados->perfil = $registro["id_perfil"];
@@ -69,10 +69,10 @@ class ManterUsuario extends Model {
         return $dados;
     }
     function salvar(Usuario $dados) {
-        $dados->nome = utf8_decode($dados->nome);
-        $dados->cpf = utf8_decode($dados->cpf);
-        $dados->senha = utf8_decode($dados->senha);
-        $dados->email = utf8_decode($dados->email);
+        $dados->nome = $dados->nome;
+        $dados->cpf = $dados->cpf;
+        $dados->senha = $dados->senha;
+        $dados->email = $dados->email;
         $sql = "insert into usuario (nome, cpf, senha, email, ativo, id_equipe, id_perfil) values ('" . $dados->nome . "','" . $dados->cpf . "','" . $dados->senha . "','" . $dados->email . "','" . $dados->ativo . "','" . $dados->equipe . "','" . $dados->perfil . "')";
 //        echo $sql . "<BR/>";
 //        exit;
@@ -88,7 +88,7 @@ class ManterUsuario extends Model {
     }
 
     function alterarSenha(Usuario $dados) {
-        $dados->senha = utf8_decode($dados->senha);
+        $dados->senha = $dados->senha;
         $sql = "update usuario set senha='" . $dados->senha . "' where id=$dados->id";
         $resultado = $this->db->Execute($sql);
         return $resultado;
