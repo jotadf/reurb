@@ -95,7 +95,7 @@
     </li>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="sociojuridicos.php">
+        <a class="nav-link collapsed" href="caracterizacoes.php">
             <i class="fa fa-building"></i>
             <span>Caracterizações</span>
         </a>
