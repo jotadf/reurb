@@ -47,13 +47,13 @@ if (!$isEdit) {
                             <h6 class="m-0 font-weight-bold text-white">
                                 <i class="fa fa-building mr-2"></i> Ficha de Caracterização Física e Vulnerabilidade
                             </h6>
-                            <a class="btn btn-outline-light btn-sm" href="gerenciar_relatorio.php">
+                            <a class="btn btn-outline-light btn-sm" href="#" onclick="window.history.back();">
                                 <i class="fa fa-arrow-left"></i> Voltar
                             </a>
                         </div>
                         
                         <div class="card-body bg-light">
-                            <form action="actions/salvar_caracterizacao.php" method="POST">
+                            <form action="save_caracterizacao.php" method="POST">
                                 
                                 <input type="hidden" name="is_edit" value="<?= $isEdit ? '1' : '0' ?>">
 
@@ -251,7 +251,7 @@ if (!$isEdit) {
 
                                 <div class="text-right mt-4">
                                     <button type="submit" class="btn btn-primary btn-lg shadow-sm">
-                                        <i class="fa fa-save mr-1"></i> Gravar Ficha de Caracterização
+                                        <i class="fa fa-save mr-1"></i> Salvar Alterações
                                     </button>
                                 </div>
                             </form>
