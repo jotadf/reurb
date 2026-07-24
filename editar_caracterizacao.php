@@ -250,8 +250,8 @@ if (!$isEdit) {
                                 </div>
 
                                 <div class="text-right mt-4">
-                                    <button type="submit" class="btn btn-primary btn-lg shadow-sm">
-                                        <i class="fa fa-save mr-1"></i> Salvar Alterações
+                                    <button type="submit" class="btn btn-primary shadow-sm">
+                                        <i class="fa fa-save"></i> Salvar Alterações
                                     </button>
                                 </div>
                             </form>

@@ -49,12 +49,8 @@ and open the template in the editor.
                 $('#nome_excluir').text(nome);
                 $('#confirm').modal({show: true});              
             }
-            function alterar(id, perfil, descricao) {
-                $('#id').val(id);
-                $('#perfil').val(perfil);
-                $('#descricao').val(descricao);
-                $('#form_perfil').collapse("show");
-                $('#btn_cadastrar').hide();
+            function alterar(action = 'processar_upload_new.php') {
+                $('#form_importar').attr('action', action);
             }
 
             function selectByText(select, text) {
@@ -94,20 +90,29 @@ and open the template in the editor.
                                 </div>
                             </div>
                             <div class="card-body">
-                                <form action="processar_upload.php" method="POST" enctype="multipart/form-data">
+                                <form id="form_importar" action="processar_upload_new.php" method="POST" enctype="multipart/form-data">
                                     <div class="container">
                                         <div class="card-body ">
                                             <div class="row">
                                                 <div class="col">
+                                                    <label for="action" class="form-label">Formato: </label>
+                                                        <input type="radio" name="formato" value="novo" checked onchange="alterar('processar_upload_new.php')"> Depois de maio 
+                                                        &nbsp;&nbsp;&nbsp;
+                                                        <input type="radio" name="formato" value="antigo" onchange="alterar('processar_upload.php')"> Antes de maio
+                                                </div>                                               
+                                            </div>
+                                             <hr class="border-primary"/>
+                                            <div class="row">
+                                                <div class="col">
                                                     <label for="arquivo_csv_selagem" class="form-label">Anexar Arquivo - Ficha de Selagem de Lote (.csv)</label>
-                                                    <input class="form-control-file" type="file" name="arquivo_csv_selagem" id="arquivo_csv_selagem" required>
+                                                    <input class="form-control-file" type="file" name="arquivo_csv_selagem" id="arquivo_csv_selagem">
                                                 </div>
                                             </div>
                                             <br/>
                                             <div class="row">
                                                 <div class="col">
                                                     <label for="arquivo_csv_domicilios" class="form-label">Anexar Arquivo - Domicílios (.csv)</label>
-                                                    <input class="form-control-file" type="file" name="arquivo_csv_domicilios" id="arquivo_csv_domicilios" required>
+                                                    <input class="form-control-file" type="file" name="arquivo_csv_domicilios" id="arquivo_csv_domicilios">
                                                 </div>
                                             </div>  
                                             <br/>
