@@ -62,7 +62,7 @@ $total = array_merge($lista);
                         <thead class="thead-dark text-nowrap text-center">
                             <tr>
                                 <th>ID SUBMISSÃO</th><th>Nº SELO</th><th>UUID</th><th>RUA/SETOR</th><th>Nº LOTE</th><th>ENDEREÇO COMPLETO</th><th>TIPO OCUPAÇÃO</th><th>QTD DOMICÍLIOS TOTAL</th><th>SELADOR</th><th>DATA FORMULÁRIO</th><th>DATA/HORA SUBMISSÃO</th>
-                                <th>INDEX KOBO</th><th>NOME ENTREVISTADO</th><th>PRINCIPAL MORADOR</th><th>TELEFONE</th><th>CPF</th><th>ESTADO CIVIL</th><th>USO PREDOMINANTE</th><th>TIPO OCUPAÇÃO</th><th>Nº PAVIMENTOS</th><th>LOCALIZAÇÃO</th><th>ACESSO INDEP.</th><th>ÁREA LOTE (M²)</th><th>COMPROV_END</th><th>FOTO COMPROV_END</th><th>FOTO FACHADA</th><th>FOTO SELO</th><th>FOTO OCUPAÇÃO</th><th>LATITUDE</th><th>LONGITUDE</th><th>ALTITUDE</th><th>PRECISÃO</th>
+                                <th>NOME ENTREVISTADO</th><th>PRINCIPAL MORADOR</th><th>TELEFONE</th><th>CPF</th><th>ESTADO CIVIL</th><th>USO PREDOMINANTE</th><th>TIPO OCUPAÇÃO</th><th>Nº PAVIMENTOS</th><th>LOCALIZAÇÃO</th><th>ACESSO INDEP.</th><th>ÁREA LOTE (M²)</th><th>COMPROV_END</th><th>FOTO COMPROV_END</th><th>FOTO FACHADA</th><th>FOTO SELO</th><th>FOTO OCUPAÇÃO</th><th>LATITUDE</th><th>LONGITUDE</th><th>ALTITUDE</th><th>PRECISÃO</th>
                             </tr>
                         </thead>
                         <tbody class="text-nowrap">
