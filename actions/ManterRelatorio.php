@@ -97,6 +97,28 @@ class ManterRelatorio extends Model {
         return $dados;
     }
 
+     /**
+     * Retorna todos os registros e colunas da tabela de Selagem de Lotes
+     */
+    public function listarSelagemSemSocioJuridico($filtro = ''){
+        $sql = "SELECT s.*,d.* 
+        FROM selagem_lotes_import as s, domicilios_import as d
+        WHERE d.id_submissao_pai = s.id_submissao
+        AND numero_selo NOT IN(SELECT codigo_selo FROM cadastro_sociojuridico_import)
+        ORDER BY data_formulario DESC";
+        $resultado = $this->db->Execute($sql);
+        $array_dados = array();
+        
+        while ($registro = $resultado->fetchRow()) {
+            $dados = new stdClass();
+            foreach ($registro as $coluna => $valor) {
+                $dados->$coluna = $valor;
+            }
+            $array_dados[] = $dados;
+        }
+        return $array_dados;
+    }
+
     /**
      * Retorna todos os registros e colunas da tabela de Cadastro Sociojurídico
      */
