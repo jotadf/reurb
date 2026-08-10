@@ -12,26 +12,7 @@ $termino = isset($_POST['termino']) ? $_POST['termino'] : '';
 
 $where = '';
 $lista = array();
-
-switch ($tipo) {
-    case 'selagem':
-        $where = " WHERE data_formulario >= '{$inicio}' AND data_formulario <= '{$termino}'";
-        $lista = $manterRelatorio->listarSelagem($where);
-        break;
-    case 'domicilio':
-        $where = " WHERE id_submissao_pai IN (SELECT id_submissao FROM selagem_lotes WHERE data_formulario >= '{$inicio}' AND data_formulario <= '{$termino}')";
-        $lista = $manterRelatorio->listarDomicilios($where);
-        break;
-    case 'socio_juridico':
-        $where = " WHERE data_registro >= '{$inicio}' AND data_registro <= '{$termino}'";
-        $lista = $manterRelatorio->listarSociojuridico($where);
-        break;
-    case 'caracterizacao':
-        $where = " WHERE data_registro >= '{$inicio}' AND data_registro <= '{$termino}'";
-        $lista = $manterRelatorio->listarCaracterizacao($where);
-        break;
-}
-
+$lista = $manterRelatorio->listarSelagemSemSocioJuridico();
 $total = array_merge($lista);
 ?>
 <!DOCTYPE html>
