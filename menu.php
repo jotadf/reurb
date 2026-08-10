@@ -116,6 +116,13 @@
             <span>Gerar Relatório</span>
         </a>
     </li>
+        <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="relatorio_selagens_sem_sociojuridico.php">
+            <i class="fa fa-file-excel"></i>
+            <span>Relatório Selagens Sem Sócio Jurídico</span>
+        </a>
+    </li>
 
         <!-- Sidebar Toggler (Sidebar) --> 
     <div class="text-center d-none d-md-inline">
