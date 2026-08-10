@@ -225,6 +225,33 @@ class ManterRelatorio extends Model {
         }
         return $dados;
     }
+        /**
+     * Lista todas as caracterizações trazendo todos os campos da tabela
+     * @return array Lista de objetos com o mapeamento completo do banco
+     */
+    public function listarCaracterizacaoSemSelagem() {
+        // 🔥 Alterado para buscar todas as colunas de forma irrestrita
+        $sql = "SELECT * 
+                FROM caracterizacao_vulnerabilidade_import
+                WHERE codigo_selo NOT IN(SELECT numero_selo FROM domicilios_import)
+                ORDER BY data_registro DESC";
+                
+        $resultado = $this->db->Execute($sql);
+        $array_dados = array();
+        
+        while ($registro = $resultado->fetchRow()) {
+            $dados = new stdClass();
+            
+            // 🔥 Mapeamento dinâmico: qualquer campo novo criado no banco 
+            // será indexado automaticamente como propriedade do objeto
+            foreach ($registro as $coluna => $valor) {
+                $dados->$coluna = $valor;
+            }
+            
+            $array_dados[] = $dados;
+        }
+        return $array_dados;
+    }
 
 }
 

@@ -118,12 +118,18 @@
     </li>
         <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="relatorio_selagens_sem_sociojuridico.php">
+        <a class="nav-link collapsed" target="_blank" href="relatorio_selagens_sem_sociojuridico.php">
             <i class="fa fa-file-excel"></i>
-            <span>Relatório Selagens Sem Sócio Jurídico</span>
+            <span>Listagem de Selagens Sem Sócio Jurídico</span>
         </a>
     </li>
-
+        <!-- Nav Item - Pages Collapse Menu -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" target="_blank" href="relatorio_caracterizacoes_sem_selagem.php">
+            <i class="fa fa-file-excel"></i>
+            <span>Listagem de Caracterizações Sem Selagem</span>
+        </a>
+    </li>
         <!-- Sidebar Toggler (Sidebar) --> 
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
