@@ -10,8 +10,8 @@
 </head>
 <body id="page-top">
 <?php
-//ini_set('display_errors', 1);
-//error_reporting(E_ALL);
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 /**
  * Script de Importação Manual via Upload de Arquivo Único
  * Ano: 2026
@@ -101,11 +101,11 @@ function importarSelagem($arquivo, $pdo) {
         fgetcsv($handle_selagem, 4000, ";");
         
         $sql = "INSERT INTO selagem_lotes_import 
-                (id_submissao, uuid, rua_zona_setor, numero_lote, endereco_oficial_completo, 
+                (id_submissao, uuid, rua_zona_setor, numero_lote, comprovante_endereco, foto_comprovante_endereco, endereco_oficial_completo, 
                  tipo_ocupacao_lote, qtd_domicilios_lote, qtd_domicilios_total, nome_selador, data_formulario, 
                  observacoes, data_hora_submissao, versao)
                 VALUES 
-                (:id_submissao, :uuid, :rua_zona_setor, :numero_lote, :endereco_oficial_completo, 
+                (:id_submissao, :uuid, :rua_zona_setor, :numero_lote, :comprovante_endereco, :foto_comprovante_endereco, :endereco_oficial_completo, 
                  :tipo_ocupacao_lote, :qtd_domicilios_lote, :qtd_domicilios_total, :nome_selador, :data_formulario, 
                  :observacoes, :data_hora_submissao, :versao)
                 ON DUPLICATE KEY UPDATE uuid=VALUES(uuid);";
@@ -116,25 +116,27 @@ function importarSelagem($arquivo, $pdo) {
         while (($data = fgetcsv($handle_selagem, 4000, ";")) !== FALSE) {
             
             // 3. Validação de Segurança: Ignora se o ID estiver vazio, nulo ou não for numérico
-            if (!isset($data[9]) || trim($data[9]) === '' || !is_numeric(trim($data[9]))) {
+            if (!isset($data[11]) || trim($data[11]) === '' || !is_numeric(trim($data[11]))) {
                 continue; 
             }
 
-            $id_submissao              = trim($data[9]);  
+            $id_submissao              = trim($data[11]);  
             $uuid                      = $data[10]  ?? null; 
             $rua_zona_setor            = $data[0]   ?? null; 
             $numero_lote               = $data[1]   ?? null; 
-            $endereco_oficial_completo = $data[2]   ?? null; 
-            $tipo_ocupacao_lote        = $data[3]   ?? null; 
+            $comprovante_endereco      = $data[2] ?? null;  // Sim / Não
+            $foto_comprovante_endereco = $data[3] ?? null;  // URL da foto do comprovante de endereço
+            $endereco_oficial_completo = $data[4]   ?? null; 
+            $tipo_ocupacao_lote        = $data[5]   ?? null; 
             
-            $qtd_domicilios_lote       = (empty($data[4]) || !is_numeric($data[4])) ? 1 : (int)$data[4];
-            $qtd_domicilios_total      = (empty($data[5]) || !is_numeric($data[5])) ? 1 : (int)$data[5];
+            $qtd_domicilios_lote       = (empty($data[6]) || !is_numeric($data[6])) ? 1 : (int)$data[6];
+            $qtd_domicilios_total      = (empty($data[7]) || !is_numeric($data[7])) ? 1 : (int)$data[7];
             
-            $nome_selador              = $data[6]   ?? null; 
-            $observacoes               = $data[7]   ?? null; 
+            $nome_selador              = $data[8]   ?? null; 
+            $observacoes               = $data[9]   ?? null; 
 
             // Tratamento seguro da Data do Formulário
-            $data_raw = isset($data[8]) ? trim($data[8]) : '';
+            $data_raw = isset($data[10]) ? trim($data[10]) : '';
             if (!empty($data_raw) && $data_raw !== '0000-00-00') {
                 $timestamp = strtotime(str_replace('/', '-', $data_raw));
                 $data_formulario = ($timestamp !== false) ? date('Y-m-d', $timestamp) : null;
@@ -143,7 +145,7 @@ function importarSelagem($arquivo, $pdo) {
             }
             
             // Tratamento seguro do Data/Hora de Submissão
-            $raw_dh = isset($data[11]) ? trim($data[11]) : '';
+            $raw_dh = isset($data[13]) ? trim($data[13]) : '';
             if (!empty($raw_dh)) {
                 $clean_dh = str_replace('T', ' ', $raw_dh);
                 $data_hora_submissao = substr($clean_dh, 0, 19);
@@ -151,13 +153,15 @@ function importarSelagem($arquivo, $pdo) {
                 $data_hora_submissao = null;
             }
             
-            $versao = isset($data[15]) ? substr(trim($data[15]), 0, 100) : null;
+            $versao = isset($data[18]) ? substr(trim($data[18]), 0, 100) : null;
 
             $stmt->execute([
                 ':id_submissao'              => $id_submissao,
                 ':uuid'                      => $uuid,
                 ':rua_zona_setor'            => $rua_zona_setor,
                 ':numero_lote'               => $numero_lote,
+                ':comprovante_endereco'      => $comprovante_endereco,
+                ':foto_comprovante_endereco' => $foto_comprovante_endereco,
                 ':endereco_oficial_completo' => $endereco_oficial_completo,
                 ':tipo_ocupacao_lote'        => $tipo_ocupacao_lote,
                 ':qtd_domicilios_lote'       => $qtd_domicilios_lote,
@@ -195,14 +199,14 @@ function importarDomicilios($arquivo, $pdo) {
         // Utilizando parâmetros nomeados (:numero_selo) para eliminar a contagem cega de "?"
         $sql = "INSERT INTO domicilios_import
                 (numero_selo, id_submissao_pai, index_kobo, nome_entrevistado, nome_principal_morador, 
-                 telefone, cpf, casado_uniao_estavel, uso_predominante, tipo_ocupacao_imovel, declaracao_ciencia, termo_lgpd,
+                 telefone, cpf, casado_uniao_estavel, uso_predominante, tipo_ocupacao_imovel,
                  numero_pavimentos, localizacao_domicilio, acesso_independente, area_lote_m2, 
-                 comprovante_endereco, foto_comprovante_endereco, foto_fachada, foto_selo, foto_ocupacao, latitude, longitude, altitude, precisao)
+                  foto_fachada, foto_selo, foto_ocupacao, latitude, longitude, altitude, precisao)
                 VALUES 
                 (:numero_selo, :id_submissao_pai, :index_kobo, :nome_entrevistado, :nome_principal_morador, 
-                 :telefone, :cpf, :casado_uniao_estavel, :uso_predominante, :tipo_ocupacao_imovel, :declaracao_ciencia, :termo_lgpd,
+                 :telefone, :cpf, :casado_uniao_estavel, :uso_predominante, :tipo_ocupacao_imovel,
                  :numero_pavimentos, :localizacao_domicilio, :acesso_independente, :area_lote_m2, 
-                 :comprovante_endereco, :foto_comprovante_endereco, :foto_fachada, :foto_selo, :foto_ocupacao, :latitude, :longitude, :altitude, :precisao)
+                  :foto_fachada, :foto_selo, :foto_ocupacao, :latitude, :longitude, :altitude, :precisao)
                 ON DUPLICATE KEY UPDATE numero_selo=numero_selo;";
                 
         $stmt = $pdo->prepare($sql);
@@ -212,17 +216,18 @@ function importarDomicilios($arquivo, $pdo) {
              //for ($i = 0; $i < count($data); $i++) {
              //    echo "[$i] " . $data[$i] . "<br/>";
              //}
+             
             // 3. Validação de segurança: se o número do selo ou index estiver vazio, pula a linha
-            if (!isset($data[23]) || trim($data[23]) === '' || empty($data[23])) {
+            if (!isset($data[19]) || trim($data[19]) === '' || empty($data[19])) {
                 continue; 
             }
 
             // =========================================================================
             // DOCUMENTAÇÃO E DE-PARA DOS CAMPOS (Índices validados conforme o LOG real)
             // =========================================================================
-            $numero_selo         = trim($data[23]); // Chave Primária Lógica (ex: INV-Y-0001-0002)
-            $id_submissao_pai    = trim($data[27]); // ID de ligação com a tabela pai (selagem_lotes)
-            $index_kobo          = (int)$data[24];  // Índice interno do Kobo
+            $numero_selo         = trim($data[19]); // Chave Primária Lógica (ex: INV-Y-0001-0002)
+            $id_submissao_pai    = trim($data[23]); // ID de ligação com a tabela pai (selagem_lotes)
+            $index_kobo          = (int)$data[20];  // Índice interno do Kobo
             
             // Dados de Identificação do Morador
             $nome_entrevistado   = $data[0] ?? null;
@@ -238,22 +243,22 @@ function importarDomicilios($arquivo, $pdo) {
             $localizacao_domicilio = $data[8] ?? null; // ex: Térreo
             $acesso_independente = $data[9] ?? null;  // Sim / Não
             $area_lote_m2        = is_numeric($data[10]) ? (float)$data[10] : 0.00;
-            $comprovante_endereco = $data[11] ?? null; // Sim / Não
+            //$comprovante_endereco = $data[11] ?? null; // Sim / Não
 
-            $declaracao_ciencia = $data[13] ?? null; // Sim / Não
-            $termo_lgpd         = $data[14] ?? null; // Sim / Não
+            //$declaracao_ciencia = $data[13] ?? null; // Sim / Não
+            //$termo_lgpd         = $data[14] ?? null; // Sim / Não
             
             // URLs de Mídias e Comprovantes
-            $foto_comprovante_endereco = $data[12] ?? null; // URL da foto do comprovante de endereço
-            $foto_fachada    = $data[21] ?? null; // URL da foto da fachada do imóvel
-            $foto_selo       = $data[22] ?? null; // URL da foto comprovando selo fixado
-            $foto_ocupacao   = $data[20] ?? null; // URL da foto da ocupação do imóvel
+            //$foto_comprovante_endereco = $data[12] ?? null; // URL da foto do comprovante de endereço
+            $foto_fachada    = $data[17] ?? null; // URL da foto da fachada do imóvel
+            $foto_selo       = $data[18] ?? null; // URL da foto comprovando selo fixado
+            $foto_ocupacao   = $data[11] ?? null; // URL da foto da ocupação do imóvel
 
             // Informações de Geolocalização por GPS
-            $latitude            = (trim($data[16]) !== '') ? (float)$data[16] : null;
-            $longitude           = (trim($data[17]) !== '') ? (float)$data[17] : null;
-            $altitude            = (trim($data[18]) !== '') ? (float)$data[18] : null;
-            $precisao            = (trim($data[19]) !== '') ? (float)$data[19] : null;
+            $latitude            = (trim($data[13]) !== '') ? (float)$data[13] : null;
+            $longitude           = (trim($data[14]) !== '') ? (float)$data[14] : null;
+            $altitude            = (trim($data[15]) !== '') ? (float)$data[15] : null;
+            $precisao            = (trim($data[16]) !== '') ? (float)$data[16] : null;
 
             // Execução limpa, segura e estruturada
             $stmt->execute([
@@ -271,10 +276,6 @@ function importarDomicilios($arquivo, $pdo) {
                 ':localizacao_domicilio'     => $localizacao_domicilio,
                 ':acesso_independente'       => $acesso_independente,
                 ':area_lote_m2'              => $area_lote_m2,
-                ':comprovante_endereco'      => $comprovante_endereco,
-                ':declaracao_ciencia'        => $declaracao_ciencia,
-                ':termo_lgpd'                => $termo_lgpd,
-                ':foto_comprovante_endereco' => $foto_comprovante_endereco,
                 ':foto_fachada'              => $foto_fachada,
                 ':foto_selo'                 => $foto_selo,
                 ':foto_ocupacao'             => $foto_ocupacao,
