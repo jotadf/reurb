@@ -8,6 +8,7 @@
                         <div class="col-md-4">
                             <label for="termino" class="col-form-label">Tabela</label>
                             <select class="form-control form-control-sm w-100" id="tipo" name="tipo">
+                                <option value="selagemdomicilio">Selagem e Domicílio</option>
                                 <option value="selagem">Selagem</option>
                                 <option value="domicilio">Domicílio</option>
                                 <option value="socio_juridico">Sócio Jurídico</option>

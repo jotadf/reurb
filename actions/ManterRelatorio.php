@@ -96,7 +96,23 @@ class ManterRelatorio extends Model {
         }
         return $dados;
     }
-
+    /**
+     * Retorna todos os registros e colunas da tabela de Selagem de Lotes
+     */
+    public function listarSelagemDomicilios($filtro = ''){
+        $sql = "SELECT s.*, d.* FROM selagem_lotes_import as s, domicilios_import as d $filtro ORDER BY s.data_formulario DESC";
+        $resultado = $this->db->Execute($sql);
+        $array_dados = array();
+        
+        while ($registro = $resultado->fetchRow()) {
+            $dados = new stdClass();
+            foreach ($registro as $coluna => $valor) {
+                $dados->$coluna = $valor;
+            }
+            $array_dados[] = $dados;
+        }
+        return $array_dados;
+    }
      /**
      * Retorna todos os registros e colunas da tabela de Selagem de Lotes
      */

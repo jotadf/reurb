@@ -22,6 +22,10 @@ switch ($tipo) {
         $where = " WHERE id_submissao_pai IN (SELECT id_submissao FROM selagem_lotes WHERE data_formulario >= '{$inicio}' AND data_formulario <= '{$termino}')";
         $lista = $manterRelatorio->listarDomicilios($where);
         break;
+    case 'selagemdomicilio':
+        $where = " WHERE d.id_submissao_pai = s.id_submissao AND s.data_formulario >= '{$inicio}' AND s.data_formulario <= '{$termino}'";
+        $lista = $manterRelatorio->listarSelagemDomicilios($where);
+        break;
     case 'socio_juridico':
         $where = " WHERE data_registro >= '{$inicio}' AND data_registro <= '{$termino}'";
         $lista = $manterRelatorio->listarSociojuridico($where);
@@ -84,8 +88,12 @@ $total = array_merge($lista);
                                     <th>ID SUBMISSÃO</th><th>UUID</th><th>RUA/SETOR</th><th>Nº LOTE</th><th>ENDEREÇO COMPLETO</th><th>TIPO OCUPAÇÃO</th><th>QTD DOMICÍLIOS TOTAL</th><th>SELADOR</th><th>DATA FORMULÁRIO</th><th>DATA/HORA SUBMISSÃO</th><th>VERSÃO</th>
                                 
                                 <?php } elseif ($tipo == 'domicilio') { ?>
-                                    <th>Nº SELO</th><th>ID SUBMISSÃO PAI</th><th>INDEX KOBO</th><th>NOME ENTREVISTADO</th><th>PRINCIPAL MORADOR</th><th>TELEFONE</th><th>CPF</th><th>ESTADO CIVIL</th><th>USO PREDOMINANTE</th><th>TIPO OCUPAÇÃO</th><th>Nº PAVIMENTOS</th><th>LOCALIZAÇÃO</th><th>ACESSO INDEP.</th><th>ÁREA LOTE (M²)</th><th>COMPROV_END</th><th>FOTO COMPROV_END</th><th>FOTO FACHADA</th><th>FOTO SELO</th><th>FOTO OCUPAÇÃO</th><th>LATITUDE</th><th>LONGITUDE</th><th>ALTITUDE</th><th>PRECISÃO</th>
-                                
+                                    <th>Nº SELO</th><th>ID SUBMISSÃO PAI</th><th>INDEX KOBO</th><th>NOME ENTREVISTADO</th><th>PRINCIPAL MORADOR</th><th>TELEFONE</th><th>CPF</th><th>ESTADO CIVIL</th><th>USO PREDOMINANTE</th><th>TIPO OCUPAÇÃO</th><th>Nº PAVIMENTOS</th><th>LOCALIZAÇÃO</th><th>ACESSO INDEP.</th><th>ÁREA LOTE (M²)</th><th>COMPROV_END</th><th>FOTO COMPROV_END</th><th>FOTO FACHADA</th><th>FOTO SELO</th><th>FOTO OCUPAÇÃO</th><th>LATITUDE</th><th>LONGITUDE</th><th>ALTITUDE</th><th>PRECISÃO</th><th>GEOLOCALIZAÇÃO</th>
+
+                                <?php } elseif ($tipo == 'selagemdomicilio') { ?>
+                                <th>ID SUBMISSÃO</th><th>UUID</th><th>RUA/SETOR</th><th>Nº LOTE</th><th>ENDEREÇO COMPLETO</th><th>TIPO OCUPAÇÃO</th><th>QTD DOMICÍLIOS TOTAL</th><th>SELADOR</th><th>DATA FORMULÁRIO</th><th>DATA/HORA SUBMISSÃO</th>
+                                <th>Nº SELO</th><th>ID SUBMISSÃO PAI</th><th>INDEX KOBO</th><th>NOME ENTREVISTADO</th><th>PRINCIPAL MORADOR</th><th>TELEFONE</th><th>CPF</th><th>ESTADO CIVIL</th><th>USO PREDOMINANTE</th><th>TIPO OCUPAÇÃO</th><th>Nº PAVIMENTOS</th><th>LOCALIZAÇÃO</th><th>ACESSO INDEP.</th><th>ÁREA LOTE (M²)</th><th>COMPROV_END</th><th>FOTO COMPROV_END</th><th>FOTO FACHADA</th><th>FOTO SELO</th><th>FOTO OCUPAÇÃO</th><th>LATITUDE</th><th>LONGITUDE</ th>< th>ALTITUDE</ th>< th>PRECISÃO</ th>< th>GEOLOCALIZAÇÃO</ th>
+
                                 <?php } elseif ($tipo == 'socio_juridico') { ?>
                                     <th>ID SUBMISSÃO</th><th>UUID</th><th>CÓDIGO SELO</th><th>FOTO SELO</th><th>R1 NOME</th><th>R1 RG</th><th>R1 FOTO RG</th><th>r1_cpf</th><th>R1 FOTO CPF</th><th>R1 NATURALIDADE</th><th>R1 DATA NASC.</th><th>R1 ESTADO CIVIL</th><th>R1 PROFISSÃO</th><th>R1 ESCOLARIDADE</th><th>R1 PCD</th><th>R1 ESPECIF. PCD</th><th>R1 TELEFONE</th><th>Nº RESIDENTES</th><th>RENDA TITULAR 1</th><th>RENDA TITULAR 2</th><th>RENDA OUTRAS FONTES</th><th>CADÚNICO NIS</th><th>NÚMERO NIS</th><th>RECEBE BENEFÍCIO</th><th>BENEFÍCIOS DETALHE</th><th>RELAÇÃO IMÓVEL</th><th>FORMA AQUISIÇÃO</th><th>TEMPO OCUPAÇÃO</th><th>FOTO OCUPAÇÃO 2022</th><th>FOTO OCUPAÇÃO 2023</th><th>FOTO OCUPAÇÃO 2024</th><th>FOTO OCUPAÇÃO 2025</th><th>FOTO OCUPAÇÃO 2026</th><th>PAGA IPTU</th><th>ASSINOU ÚNICA PROP.</th><th>FOTO ÚNICA PROP.</th><th>ASSINOU MANSA/PACÍF.</th><th>FOTO MANSA/PACÍF.</th><th>ASSINOU VERACIDADE</th><th>FOTO VERACIDADE</th><th>ASSINOU LGPD</th><th>FOTO LGPD</th><th>CADASTRADOR</th><th>DATA REGISTRO</th>
                                 
@@ -134,6 +142,44 @@ $total = array_merge($lista);
                                         <td class="text-right"><?= $obj->longitude ?></td>
                                         <td class="text-right"><?= $obj->altitude ?></td>
                                         <td class="text-right"><?= $obj->precisao ?></td>
+                                        <td class="text-right"><?= $obj->latitude . " " . $obj->longitude . " " . $obj->altitude . " " . $obj->precisao ?></td>
+
+                                    <?php if ($tipo == 'selagemdomicilio') { ?>
+                                        <td class="text-center font-weight-bold"><?= $obj->id_submissao ?></td>
+                                        <td><?= htmlspecialchars($obj->uuid) ?></td>
+                                        <td><?= htmlspecialchars($obj->rua_zona_setor) ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($obj->numero_lote) ?></td>
+                                        <td><?= htmlspecialchars($obj->endereco_oficial_completo) ?></td>
+                                        <td><?= htmlspecialchars($obj->tipo_ocupacao_lote) ?></td>
+                                        <td class="text-center"><?= $obj->qtd_domicilios_total ?></td>
+                                        <td><?= htmlspecialchars($obj->nome_selador) ?></td>
+                                        <td class="text-center"><?= $obj->data_formulario ?></td>
+                                        <td class="text-center"><?= $obj->data_hora_submissao ?></td>
+                                        <!-- Additional fields from domicilios_import -->                                        
+                                        <td class="font-weight-bold text-center bg-light"><?= $obj->numero_selo ?></td>
+                                        <td class="text-center"><?= $obj->id_submissao_pai ?></td>
+                                        <td class="text-center"><?= $obj->index_kobo ?></td>
+                                        <td><?= htmlspecialchars($obj->nome_entrevistado) ?></td>
+                                        <td><?= htmlspecialchars($obj->nome_principal_morador) ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($obj->telefone) ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($obj->cpf) ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($obj->casado_uniao_estavel) ?></td>
+                                        <td><?= htmlspecialchars($obj->uso_predominante) ?></td>
+                                        <td><?= htmlspecialchars($obj->tipo_ocupacao_imovel) ?></td>
+                                        <td class="text-center"><?= $obj->numero_pavimentos ?></td>
+                                        <td><?= htmlspecialchars($obj->localizacao_domicilio) ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($obj->acesso_independente) ?></td>
+                                        <td class="text-right"><?= number_format($obj->area_lote_m2, 2, ',', '.') ?></td>
+                                        <td class="text-center"><?= htmlspecialchars($obj->comprovante_endereco) ?></td>
+                                        <td><?= htmlspecialchars($obj->foto_comprovante_endereco) ?></td>
+                                        <td><?= htmlspecialchars($obj->foto_fachada) ?></td>
+                                        <td><?= htmlspecialchars($obj->foto_selo) ?></td>
+                                        <td><?= htmlspecialchars($obj->foto_ocupacao) ?></td>
+                                        <td class="text-right"><?= $obj->latitude ?></td>
+                                        <td class="text-right"><?= $obj->longitude ?></td>
+                                        <td class="text-right"><?= $obj->altitude ?></td>
+                                        <td class="text-right"><?= $obj->precisao ?></td>
+                                        <td class="text-right"><?= $obj->latitude . " " . $obj->longitude . " " . $obj->altitude . " " . $obj->precisao ?></td>
 
                                     <?php } elseif ($tipo == 'socio_juridico') { ?>
                                         <td class="text-center font-weight-bold"><?= $obj->id_submissao ?></td>
