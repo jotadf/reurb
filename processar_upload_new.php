@@ -10,8 +10,8 @@
 </head>
 <body id="page-top">
 <?php
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+//ini_set('display_errors', 1);
+//error_reporting(E_ALL);
 /**
  * Script de Importação Manual via Upload de Arquivo Único
  * Ano: 2026
@@ -550,7 +550,7 @@ function importarSociojuridico($arquivo, $pdo) {
         $sql = "INSERT INTO cadastro_sociojuridico_import 
                 (id_submissao, uuid, codigo_selo, foto_selo, r1_nome, r1_rg, r1_foto_rg, r1_cpf, r1_foto_cpf, r1_naturalidade, r1_data_nascimento, 
                  r1_estado_civil, foto_estado_civil, regime_bens_partes, r1_profissao, r1_escolaridade, r1_pcd, r1_especifiacao_pcd, r1_telefone, numero_residentes, 
-                 renda_mensal_titular_1, renda_mensal_titular_2, renda_outras_fontes, cadunico_nis, numero_nis,
+                 renda_mensal_titular_1, renda_mensal_titular_2, renda_outras_fontes, foto_comprovante_renda1, foto_comprovante_renda2, foto_comprovante_renda3, cadunico_nis, numero_nis,
                  recebe_beneficio_social, beneficios_detalhe, relacao_com_imovel, forma_aquisicao, foto_comprovante_aquisicao, assinou_requerimento_regularizacao, foto_requerimento_regularizacao,
                  tempo_ocupacao, foto_comprovante_ocupacao_2022, foto_comprovante_ocupacao_2023, foto_comprovante_ocupacao_2024, foto_comprovante_ocupacao_2025, foto_comprovante_ocupacao_2026,
                  paga_iptu, assinou_unica_propriedade, foto_declaracao_unica_propriedade, assinou_ocupacao_mansa_pacifica, foto_declaracao_ocupacao_mansa_pacifica,
@@ -558,7 +558,7 @@ function importarSociojuridico($arquivo, $pdo) {
                 VALUES 
                 (:id_submissao, :uuid, :codigo_selo, :foto_selo, :r1_nome, :r1_rg, :r1_foto_rg, :r1_cpf, :r1_foto_cpf, :r1_naturalidade, :r1_data_nascimento, 
                  :r1_estado_civil, :r1_foto_estado_civil, :regime_bens_partes, :r1_profissao, :r1_escolaridade, :r1_pcd, :r1_especifiacao_pcd, :r1_telefone, :numero_residentes, 
-                 :renda_mensal_titular_1, :renda_mensal_titular_2, :renda_outras_fontes, :cadunico_nis, :numero_nis,
+                 :renda_mensal_titular_1, :renda_mensal_titular_2, :renda_outras_fontes, :foto_comprovante_renda1, :foto_comprovante_renda2, :foto_comprovante_renda3, :cadunico_nis, :numero_nis,
                  :recebe_beneficio_social, :beneficios_detalhe, :relacao_com_imovel, :forma_aquisicao, :foto_comprovante_aquisicao, :assinou_requerimento_regularizacao, :foto_requerimento_regularizacao, 
                  :tempo_ocupacao, :foto_comprovante_ocupacao_2022, :foto_comprovante_ocupacao_2023, :foto_comprovante_ocupacao_2024, :foto_comprovante_ocupacao_2025, :foto_comprovante_ocupacao_2026,
                  :paga_iptu, :assinou_unica_propriedade, :foto_declaracao_unica_propriedade, :assinou_ocupacao_mansa_pacifica, :foto_declaracao_ocupacao_mansa_pacifica,
@@ -571,72 +571,77 @@ function importarSociojuridico($arquivo, $pdo) {
         while (($data = fgetcsv($handle_joridico, 4000, ";", '"', "\\")) !== FALSE) {
             
             // Validação de segurança: Valida o ID de submissão no índice [68]
-            if (!isset($data[68]) || trim($data[68]) === '' || !is_numeric(trim($data[68]))) {
+            if (!isset($data[71]) || trim($data[71]) === '' || !is_numeric(trim($data[71]))) {
                 continue; 
             }
 
             // Mapeamento corrigido baseado nos índices reais do seu log
-            $id_submissao     = trim($data[68]);                 // 766470405
-            $uuid             = $data[69] ?? null;               // b5c274f3-3096-4286-a8c0-7961ab6edba1 (Ajustado)
+            $id_submissao     = trim($data[71]);                 // 766470405
+            $uuid             = $data[72] ?? null;               // b5c274f3-3096-4286-a8c0-7961ab6edba1 (Ajustado)
             $codigo_selo      = $data[3]  ?? null;               // BIS-0-016A-0028
             $foto_selo        = $data[4]  ?? null;               // 1780146176940.jpg
 
             // Dados Titular R1
             $r1_nome          = $data[5]  ?? null;               // Lucianne Mendes da Silva
-            $r1_rg            = $data[6]  ?? null;               // 2.592.458
-            $r1_foto_rg       = $data[7]  ?? null;               // 1780146421415.jpg
-            $r1_cpf           = isset($data[8]) ? str_replace(['.', '-'], '', $data[8]) : null;
-            $r1_foto_cpf      = $data[9]  ?? null;               // 1780146501569.jpg
-            $r1_naturalidade  = $data[10] ?? null;               // PINDARÉ MIRIN-MA
-            $r1_data_nascimento = (!empty($data[11]) && $data[11] !== '0000-00-00') ? $data[11] : null;
-            $r1_estado_civil  = $data[12] ?? null;               // Solteira(o)
-            $r1_foto_estado_civil = $data[13] ?? null;
-            $r1_regime_bens_partes = $data[14] ?? null;
-            $r1_profissao     = $data[15] ?? null;               // SECRETÁRIA DO LAR
-            $r1_escolaridade  = $data[16] ?? null;               // Ensino Fundamental Incompleto
-            $r1_pcd           = $data[17] ?? null;               // Não
-            $r1_especifiacao_pcd = $data[18] ?? null;
-            $r1_telefone      = $data[23] ?? null;               // (61)99944-5303
+            $r1_rg            = $data[7]  ?? null;               // 2.592.458
+            $r1_foto_rg       = $data[8]  ?? null;               // 1780146421415.jpg
+            $r1_cpf           = isset($data[9]) ? str_replace(['.', '-'], '', $data[9]) : null;
+            $r1_foto_cpf      = $data[10]  ?? null;               // 1780146501569.jpg
+            $r1_naturalidade  = $data[11] ?? null;               // PINDARÉ MIRIN-MA
+            $r1_data_nascimento = (!empty($data[12]) && $data[12] !== '0000-00-00') ? $data[12] : null;
+            $r1_estado_civil  = $data[13] ?? null;               // Solteira(o)
+            $r1_foto_estado_civil = $data[14] ?? null;
+            $r1_regime_bens_partes = $data[15] ?? null;
+            $r1_profissao     = $data[16] ?? null;               // SECRETÁRIA DO LAR
+            $r1_escolaridade  = $data[17] ?? null;               // Ensino Fundamental Incompleto
+            $r1_pcd           = $data[18] ?? null;               // Não
+            $r1_especifiacao_pcd = $data[19] ?? null;
+            $r1_telefone      = $data[6] ?? null;               // (61)99944-5303
             
             // Financeiro e Residentes
             $numero_residentes      = is_numeric($data[24] ?? null) ? (int)$data[24] : 1;
             $renda_mensal_titular_1 = isset($data[25]) ? (float)str_replace(',', '.', $data[25]) : 0.00;
             $renda_mensal_titular_2 = isset($data[26]) ? (float)str_replace(',', '.', $data[26]) : 0.00;
             $renda_outras_fontes    = isset($data[27]) ? (float)str_replace(',', '.', $data[27]) : 0.00;
+            $foto_comprovante_renda1 = $data[28] ?? null;
+            $foto_comprovante_renda2 = $data[29] ?? null;
+            $foto_comprovante_renda3 = $data[30] ?? null;
             
             // Benefícios
-            $cadunico_nis            = $data[28] ?? null;
-            $numero_nis              = $data[29] ?? null;
-            $recebe_beneficio_social = $data[30] ?? null;
-            $beneficios_detalhe      = $data[31] ?? null;
+            $cadunico_nis            = $data[31] ?? null;
+            $numero_nis              = $data[32] ?? null;
+            $recebe_beneficio_social = $data[33] ?? null;
+            $beneficios_detalhe      = $data[34] ?? null;
             
             // Imóvel
-            $relacao_com_imovel          = $data[43] ?? null;
-            $forma_aquisicao             = $data[44] ?? null;
-            $foto_comprovante_aquisicao  = $data[45] ?? null;
-            $tempo_ocupacao              = $data[49] ?? null;
-            $foto_comprovante_ocupacao_2022 = $data[50] ?? null;
-            $foto_comprovante_ocupacao_2023 = $data[51] ?? null;
-            $foto_comprovante_ocupacao_2024 = $data[52] ?? null;
-            $foto_comprovante_ocupacao_2025 = $data[53] ?? null;
-            $foto_comprovante_ocupacao_2026 = $data[54] ?? null;
-            $paga_iptu                   = $data[55] ?? null;
-            
+            $relacao_com_imovel          = $data[46] ?? null;
+            $forma_aquisicao             = $data[47] ?? null;
+            $foto_comprovante_aquisicao  = $data[48] ?? null;
+            $tempo_ocupacao              = $data[52] ?? null;
+            $foto_comprovante_ocupacao_2022 = $data[57] ?? null;
+            $foto_comprovante_ocupacao_2023 = $data[56] ?? null;
+            $foto_comprovante_ocupacao_2024 = $data[55] ?? null;
+            $foto_comprovante_ocupacao_2025 = $data[54] ?? null;
+            $foto_comprovante_ocupacao_2026 = $data[53] ?? null;
+            $paga_iptu                   = $data[58] ?? null;
+                        
             // Declarações
-            $assinou_unica_propriedade          = $data[56] ?? null;
-            $foto_declaracao_unica_propriedade  = $data[57] ?? null;
-            $assinou_requerimento_regularizacao  = $data[58] ?? null;
-            $foto_requerimento_regularizacao    = $data[59] ?? null;
-            $assinou_ocupacao_mansa_pacifica    = $data[60] ?? null;
-            $foto_declaracao_ocupacao_mansa_pacifica = $data[61] ?? null;
-            $assinou_veracidade                 = $data[62] ?? null;
-            $foto_declaracao_veracidade         = $data[63] ?? null;
-            $assinou_lgpd                       = $data[64] ?? null;
-            $foto_declaracao_lgpd               = $data[65] ?? null;
+            $assinou_unica_propriedade          = $data[59] ?? null;
+            $foto_declaracao_unica_propriedade  = $data[60] ?? null;
+
+            $assinou_requerimento_regularizacao  = $data[61] ?? null;
+            $foto_requerimento_regularizacao    = $data[62] ?? null;
+            $assinou_ocupacao_mansa_pacifica    = $data[63] ?? null;
+            $foto_declaracao_ocupacao_mansa_pacifica = $data[64] ?? null;
+            $assinou_veracidade                 = $data[65] ?? null;
+            $foto_declaracao_veracidade         = $data[66] ?? null;
+
+            $assinou_lgpd                       = $data[67] ?? null;
+            $foto_declaracao_lgpd               = $data[68] ?? null;
             
             // Metadados
-            $nome_cadastrador = $data[66] ?? null;
-            $data_registro    = (!empty($data[67]) && $data[67] !== '0000-00-00') ? $data[67] : null;
+            $nome_cadastrador = $data[69] ?? null;
+            $data_registro    = (!empty($data[70]) && $data[70] !== '0000-00-00') ? $data[70] : null;
 
             // Execução com os 49 parâmetros rigorosamente pareados
             $stmt->execute([
@@ -663,6 +668,9 @@ function importarSociojuridico($arquivo, $pdo) {
                 ':renda_mensal_titular_1'               => $renda_mensal_titular_1,
                 ':renda_mensal_titular_2'               => $renda_mensal_titular_2,
                 ':renda_outras_fontes'                  => $renda_outras_fontes,
+                ':foto_comprovante_renda1'              => $foto_comprovante_renda1,
+                ':foto_comprovante_renda2'              => $foto_comprovante_renda2,
+                ':foto_comprovante_renda3'              => $foto_comprovante_renda3,
                 ':cadunico_nis'                         => $cadunico_nis,
                 ':numero_nis'                           => $numero_nis,
                 ':recebe_beneficio_social'              => $recebe_beneficio_social,
