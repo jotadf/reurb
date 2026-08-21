@@ -7,12 +7,18 @@
 <title>Painel de Acompanhamento — Selagem / REURB</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="assets/css/painel.css">
+<link rel="stylesheet" href="../css/sb-admin-2.min.css">
+<style>
+    body{
+        font-size: small;
+    }
+</style>
 </head>
-<body>
-<nav class="navbar navbar-dark bg-primary shadow-sm">
+<body class="bg-light mt-0 ml-0 mr-0">
+<nav class="navbar navbar-dark bg-gradient-primary">
   <div class="container-fluid"><span class="navbar-brand mb-0 h1">Painel de Acompanhamento — Selagem / REURB</span><span class="text-white small" id="atualizado"></span></div>
 </nav>
-<div class="container-fluid py-4">
+<div class="container-fluid py-2">
   <div class="card mb-4 shadow-sm">
     <div class="card-body">
       <div class="form-row align-items-end">
@@ -35,7 +41,7 @@
   </div>
 
   <div class="row">
-    <div class="col-lg-7 mb-4"><div class="card shadow-sm h-100"><div class="card-header">Conciliação pelo código do selo</div><div class="card-body"><canvas id="chartMatching"></canvas><p class="small text-muted mt-3 mb-0">O vínculo é verificado comparando <code>domicilios_import.numero_selo</code> com <code>cadastro_sociojuridico_import.codigo_selo</code>, após remoção de espaços e normalização para maiúsculas.</p></div></div></div>
+    <div class="col-lg-7 mb-4"><div class="card shadow-sm h-100"><div class="card-header">Conciliação pelo código do selo</div><div class="card-body"><canvas id="chartMatching"></canvas><p class="small text-muted mt-3 mb-0">O vínculo é verificado comparando <code>número do selo do domicílio</code> com <code> o código do selo de sociojurídico</code>, após remoção de espaços e normalização para maiúsculas.</p></div></div></div>
     <div class="col-lg-5 mb-4"><div class="card shadow-sm h-100"><div class="card-header">Situação dos cadastros</div><div class="card-body"><canvas id="chartPie"></canvas></div></div></div>
   </div>
   <div class="row">

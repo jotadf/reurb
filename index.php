@@ -53,7 +53,11 @@ and open the template in the editor.
                 <!-- Main Content -->
                 <div id="content">
                     <?php include './top_bar.php'; ?>
-                    
+                    <iframe 
+                        src="painel/index.php"
+                        style="width: 100%; height: 92%; border: 0; margin: 0; padding: 0; display: block;"
+                        frameborder="0">
+                    </iframe>
                 </div>
                 <!-- End of Main Content -->
 
