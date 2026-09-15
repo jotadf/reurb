@@ -80,7 +80,18 @@ class ManterRelatorio extends Model {
         }
         return $dados;
     }
-
+    /**
+     * Busca um Domicílio específico pelo Número do Selo (Chave Primária)
+     */
+    public function existeDomicilioPorSelo($numero_selo) {
+        $sql = "SELECT * FROM domicilios_import WHERE numero_selo = '" . $numero_selo . "'";
+        $resultado = $this->db->Execute($sql);
+    
+        if ($registro = $resultado->fetchRow()) {
+            return true;
+        }
+        return false;
+    }
     /**
      * Busca um Domicílio pelo ID de submissão do Lote Pai (Selagem)
      */
