@@ -151,7 +151,7 @@ and open the template in the editor.
         <!-- Modal excluir -->
         <div class="modal fade" id="editar_selo" role="dialog">
             <div class="modal-dialog modal-sm">
-
+                <form id="form_editar_selo" method="post" action="alterar_selo_sociojuridico.php">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Alterar Selo</h5>
@@ -160,7 +160,7 @@ and open the template in the editor.
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form id="form_editar_selo" method="post" action="alterar_selo_sociojuridico.php">
+                        
                             <input type="hidden" name="id" id="id">
                             <input type="hidden" name="selo_atual" id="selo_atual_hidden">
                             <div class="form-group">
@@ -168,14 +168,14 @@ and open the template in the editor.
                                 <input type="text" class="form-control" name="selo" id="selo" required>
                             </div>
                             
-                        </form>
+                        
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary" id="save">Salvar</button>
                         <button type="button" data-dismiss="modal" class="btn btn-secondary">Cancelar</button>
                     </div>
-                </div>
-
+                </div>                
+                </form>
             </div>
         </div>
 
