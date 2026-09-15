@@ -52,7 +52,7 @@ and open the template in the editor.
             function alterarSelo(id, selo) {
                 $('#id').val(id);
                 $('#selo').val(selo);
-                $('#selo_atual_hidden').val($selo_atual);
+                $('#selo_atual_hidden').val(selo);
                 $('#selo_atual').text('(Atual: ' + selo + ')');
                 $('#editar_selo').modal({show: true});              
             }
