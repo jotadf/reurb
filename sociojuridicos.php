@@ -49,6 +49,12 @@ and open the template in the editor.
                 $('#confirm').modal({show: true});              
             }
 
+            function alterarSelo(id, selo) {
+                $('#id').val(id);
+                $('#selo').val(selo);
+                $('#editar_selo').modal({show: true});              
+            }
+
             function selectByText(select, text) {
                 $(select).find('option:contains("' + text + '")').prop('selected', true);
             }
@@ -132,6 +138,36 @@ and open the template in the editor.
                     </div>
                     <div class="modal-footer">
                         <a href="#" type="button" class="btn btn-danger" id="delete">Excluir</a>
+                        <button type="button" data-dismiss="modal" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+
+        <!-- Modal excluir -->
+        <div class="modal fade" id="editar_selo" role="dialog">
+            <div class="modal-dialog modal-sm">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Alterar Selo</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="form_editar_selo" method="post" action="alterar_selo_sociojuridico.php">
+                            <input type="hidden" name="id" id="id">
+                            <div class="form-group">
+                                <label for="selo">Selo</label>
+                                <input type="text" class="form-control" name="selo" id="selo" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <a href="#" type="button" class="btn btn-primary" id="save">Salvar</a>
                         <button type="button" data-dismiss="modal" class="btn btn-secondary">Cancelar</button>
                     </div>
                 </div>
