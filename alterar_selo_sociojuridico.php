@@ -8,8 +8,9 @@ include_once('actions/ManterRelatorio.php');
 $manterRelatorio = new ManterRelatorio();
    
 // 🔥 ALTERADO: Pega o estado do formulário enviado pelo input hidden
-$id= isset($_REQUEST['id']) ? (int)$_REQUEST['id'] : 0;
+$id= (int)$_REQUEST['id'];
 $selo = trim($_REQUEST['selo']);
+$selo_atual = trim($_REQUEST['selo_atual']);
 
 if ($id <= 0 || empty($selo)) {
     echo "<script>alert('ID e Selo são obrigatórios.'); window.history.back();</script>";
@@ -23,6 +24,9 @@ $resultado = $manterRelatorio->db->Execute($sql);
 $mensagem = "Selo atualizado com sucesso!";
 
 if ($resultado) {
+    $sql_log = "INSERT INTO auditoria (tabela, acao, usuario, valor_antigo, valor_novo, atualizado) 
+    VALUES ('cadastro_sociojuridico_import', 'UPDATE', '{$usuario_logado->id}', '{$selo_atual}', '{$selo}', now())";
+    $manterRelatorio->db->Execute($sql_log);
     echo "<script>alert('{$mensagem}'); window.location.href = 'sociojuridicos.php';</script>";
     exit();
 } else {
