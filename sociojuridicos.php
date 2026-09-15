@@ -52,6 +52,7 @@ and open the template in the editor.
             function alterarSelo(id, selo) {
                 $('#id').val(id);
                 $('#selo').val(selo);
+                $('#selo_atual').text('(Atual: ' + selo + ')');
                 $('#editar_selo').modal({show: true});              
             }
 
@@ -161,9 +162,10 @@ and open the template in the editor.
                         <form id="form_editar_selo" method="post" action="alterar_selo_sociojuridico.php">
                             <input type="hidden" name="id" id="id">
                             <div class="form-group">
-                                <label for="selo">Selo</label>
+                                <label for="selo">Selo <span id="selo_atual"></span></label>
                                 <input type="text" class="form-control" name="selo" id="selo" required>
                             </div>
+                            
                         </form>
                     </div>
                     <div class="modal-footer">

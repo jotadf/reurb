@@ -20,7 +20,7 @@
             if($obj->excluir){
                 $btn_excluir = "&nbsp;&nbsp;<button class='btn btn-danger btn-sm' type='button' onclick='excluir(".$obj->codigo_selo.",\"".$obj->r1_nome."\")'><i class='far fa-trash-alt'></i></button>";
             }
-            echo "  <td align='center'>".$btn_editar."&nbsp;&nbsp;".$btn_excluir."&nbsp;&nbsp;".$btn_domicilios."&nbsp;&nbsp;".$btn_editar_selo."</td>";   
+            echo "  <td align='center'>".$btn_editar."&nbsp;&nbsp;".$btn_editar_selo."&nbsp;&nbsp;".$btn_excluir."&nbsp;&nbsp;".$btn_domicilios."</td>";   
             echo "</tr>";
         }
 
