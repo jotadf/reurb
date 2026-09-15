@@ -92,6 +92,19 @@ class ManterRelatorio extends Model {
         }
         return false;
     }
+    public function alteraSeloSociojuridico($selo, $novo_selo, $id_submissao, $id_usuario) {
+        $sql = "UPDATE cadastro_sociojuridico_import SET codigo_selo = '{$novo_selo}' WHERE id_submissao = " . $id_submissao;
+        $sql_log = "INSERT INTO auditoria (tabela, acao, usuario, valor_antigo, valor_novo, atualizado) 
+    VALUES ('cadastro_sociojuridico_import', 'UPDATE', '{$id_usuario}', '{$selo}', '{$novo_selo}', now())";
+
+        $resultado = $this->db->Execute($sql);
+        if ($resultado) {
+            $this->db->Execute($sql_log);
+        } else {
+            return false; // Retorna false se a atualização falhar
+        }
+        return $resultado;
+    }
     /**
      * Busca um Domicílio pelo ID de submissão do Lote Pai (Selagem)
      */
