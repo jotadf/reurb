@@ -6,9 +6,15 @@
 	$lista = $manterRelatorio->listarSociojuridico();
         
         foreach ($lista as $obj) {
+            $class_existe = " text-success ";
+            $texto_existe = " Domicílio existente ";
+            if(!$manterRelatorio->existeDomicilioPorSelo($obj->codigo_selo)){
+                $class_existe = " text-danger ";
+                $texto_existe = " Não existe vínculo com Domicílio ";
+            } 
             echo "<tr>";
             echo "  <td>".$obj->id_submissao."</td>";
-            echo "  <td>".$obj->codigo_selo."</td>";
+            echo "  <td class='".$class_existe."' title='".$texto_existe."'>".$obj->codigo_selo."</td>";
             echo "  <td>".$obj->r1_nome."</td>";
             echo "  <td>".$obj->data_registro."</td>";
             $btn_excluir = "&nbsp;&nbsp;<button class='btn btn-secondary btn-sm' type='button' title='Possuí dependências!'><i class='far fa-trash-alt' alt='Possuí dependências!'></i></button>";
