@@ -171,7 +171,7 @@ and open the template in the editor.
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <a href="#" type="button" class="btn btn-primary" id="save">Salvar</a>
+                        <button type="submit" class="btn btn-primary" id="save">Salvar</button>
                         <button type="button" data-dismiss="modal" class="btn btn-secondary">Cancelar</button>
                     </div>
                 </div>
