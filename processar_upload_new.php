@@ -145,12 +145,21 @@ function importarSelagem($arquivo, $pdo) {
             }
             
             // Tratamento seguro do Data/Hora de Submissão
+//            $raw_dh = isset($data[13]) ? trim($data[13]) : '';
+//            if (!empty($raw_dh)) {
+//                $clean_dh = str_replace('T', ' ', $raw_dh);
+//                $data_hora_submissao = substr($clean_dh, 0, 19);
+//            } else {
+//                $data_hora_submissao = null;
+//            }
+
+            // Tratamento seguro da Data/Hora de Submissão
             $raw_dh = isset($data[13]) ? trim($data[13]) : '';
-            if (!empty($raw_dh)) {
-                $clean_dh = str_replace('T', ' ', $raw_dh);
-                $data_hora_submissao = substr($clean_dh, 0, 19);
+            if (!empty($raw_dh) && $raw_dh !== '0000-00-00') {
+                $timestamp = strtotime(str_replace('/', '-', $raw_dh));
+                $data_hora_submissao = ($timestamp !== false) ? date('Y-m-d', $timestamp) : null;
             } else {
-                $data_hora_submissao = null;
+                $data_hora_submissao = null; 
             }
             
             $versao = isset($data[18]) ? substr(trim($data[18]), 0, 100) : null;
