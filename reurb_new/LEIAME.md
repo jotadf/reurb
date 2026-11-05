@@ -153,8 +153,13 @@ Chaves de `t`: `selagem`, `domicilios`, `socio`, `caracterizacao`, `perfil`, `eq
   listagem ficam em `config/tabelas.php`.
 - ID do Kobo e chave primária: editáveis só na inclusão. Data/Hora de Envio: sempre
   somente leitura, como na ficha original.
-- Campos `foto_*` têm botão para abrir a imagem (configure `fotos_base_url` se o banco
-  guarda só o nome do arquivo). Campos de vínculo (`id_submissao_pai`, `codigo_selo`)
+- Fotos: o banco guarda o nome do arquivo, e o endereço é montado com `fotos_base_url`
+  (`config/config.php`, padrão `/arquivos/`, que corresponde a `~/www/arquivos`) mais a
+  pasta da tela (`pasta_fotos` em `config/tabelas.php`): Domicílios → `domicilio/`,
+  Sócio jurídico → `socio_juridico/`, Caracterização → `caracterizacao/`. Cada campo
+  `foto_*` tem um botão para abrir a imagem e mostra uma miniatura, inclusive para o
+  Observador; se o arquivo não existir ou não for imagem (ex.: PDF), aparece um aviso.
+- Campos de vínculo (`id_submissao_pai`, `codigo_selo`)
   têm botão que abre a ficha ligada.
 - A ficha do lote lista os domicílios dele; a ficha do domicílio lista o cadastro
   sociojurídico e a caracterização (ligados por `codigo_selo` = `numero_selo`).

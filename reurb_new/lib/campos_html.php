@@ -32,6 +32,16 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
         if ($c['tipo'] === 'senha') {
             $mostrar = '••••••';
         }
+        // Foto em modo leitura: valor + botão para abrir + miniatura
+        if ($c['tipo'] === 'foto') {
+            $href = $crud->urlFoto($valorTexto);
+            $html = '<div class="input-group">'
+                  . '<input type="text" class="form-control" id="' . e($id) . '" value="' . e($valorTexto) . '" readonly>'
+                  . '<div class="input-group-append"><a class="btn btn-outline-primary' . ($href === '' ? ' disabled" aria-disabled="true' : '') . '"'
+                  . ' href="' . e($href !== '' ? $href : '#') . '" target="_blank" rel="noopener" title="Abrir imagem"><i class="fas fa-image"></i></a></div>'
+                  . '</div>' . foto_previa($id, $href, $c['label']);
+            return envolver($c['col'], $label . $html . $feedback);
+        }
         $html = $c['tipo'] === 'textarea' || ($c['base'] === 'textarea' && $c['tipo'] !== 'foto')
             ? '<textarea class="form-control" id="' . e($id) . '" rows="2" readonly>' . e($mostrar) . '</textarea>'
             : '<input type="text" class="form-control" id="' . e($id) . '" value="' . e($mostrar) . '" readonly>';
@@ -92,8 +102,8 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
         case 'foto':
         case 'ref':
             if ($c['tipo'] === 'foto') {
-                $base  = (string) cfg('fotos_base_url', '');
-                $href  = $valorTexto === '' ? '#' : (preg_match('#^(https?:)?//|^/#i', $valorTexto) ? $valorTexto : $base . $valorTexto);
+                $base  = $crud->baseFotos();
+                $href  = $valorTexto === '' ? '#' : $crud->urlFoto($valorTexto);
                 $icone = 'fa-image';
                 $dica  = 'Abrir imagem';
                 $modo  = 'foto';
@@ -114,6 +124,9 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
                   . '<div class="input-group-append"><a class="btn btn-outline-primary' . $desab . '" id="' . e($alvo) . '"'
                   . ' href="' . e($href) . '" target="_blank" rel="noopener" title="' . $dica . '"><i class="fas ' . $icone . '"></i></a></div>'
                   . '</div>';
+            if ($c['tipo'] === 'foto') {
+                $html .= foto_previa($id, $valorTexto === '' ? '' : $href, $c['label']);
+            }
             break;
 
         default:
@@ -138,6 +151,22 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
     }
 
     return envolver($c['col'], $label . $html . $feedback);
+}
+
+/**
+ * Miniatura da foto abaixo do campo. Se o arquivo não existir ou não for imagem
+ * (ex.: PDF), mostra um aviso no lugar; o botão de abrir continua funcionando.
+ */
+function foto_previa(string $idCampo, string $href, string $rotulo): string
+{
+    return '<div class="reurb-foto-previa' . ($href === '' ? ' vazia' : '') . '" data-previa-de="' . e($idCampo) . '">'
+         . '<a href="' . e($href !== '' ? $href : '#') . '" target="_blank" rel="noopener">'
+         . '<img src="' . e($href) . '" alt="' . e($rotulo) . '" loading="lazy"'
+         . ' onload="this.closest(\'.reurb-foto-previa\').classList.remove(\'sem-imagem\')"'
+         . ' onerror="if(this.getAttribute(\'src\'))this.closest(\'.reurb-foto-previa\').classList.add(\'sem-imagem\')"></a>'
+         . '<small class="aviso text-muted"><i class="fas fa-exclamation-triangle text-warning"></i> '
+         . 'Prévia indisponível: arquivo não encontrado ou não é imagem.</small>'
+         . '</div>';
 }
 
 function envolver(int $col, string $conteudo): string

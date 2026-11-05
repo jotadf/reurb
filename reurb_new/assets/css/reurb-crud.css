@@ -62,6 +62,18 @@
 .btn-salvar { background-color: #0d6efd; border-color: #0d6efd; color: #fff; }
 .btn-salvar:hover, .btn-salvar:focus { background-color: #0b5ed7; border-color: #0a58ca; color: #fff; }
 
+/* Miniatura das fotos */
+.reurb-foto-previa { margin-top: .5rem; }
+.reurb-foto-previa img {
+    display: block; max-width: 100%; max-height: 140px; width: auto;
+    border: 1px solid #d1d3e2; border-radius: .35rem; background: #f8f9fc;
+}
+.reurb-foto-previa a:hover img { border-color: #4e73df; }
+.reurb-foto-previa .aviso { display: none; }
+.reurb-foto-previa.sem-imagem img { display: none; }
+.reurb-foto-previa.sem-imagem .aviso { display: block; }
+.reurb-foto-previa.vazia { display: none; }
+
 .reurb-json { background: #f8f9fc; border: 1px solid #e3e6f0; border-radius: .35rem; padding: .75rem; font-size: .8rem; max-height: 360px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
 
 /* ---------- Listagem ---------- */

@@ -38,10 +38,12 @@ return [
     // ficarem errados quando ele for incluído em páginas de outras pastas.
     'crud_url' => '',
 
-    // Prefixo usado para abrir as fotos (campos foto_*).
-    // Se no banco estiver gravado só o nome do arquivo, informe a pasta, ex.: '/reurb/uploads/'
-    // Se já estiver gravada a URL completa, deixe ''.
-    'fotos_base_url' => '',
+    // Endereço (no site) da pasta das fotos: ~/www/arquivos -> '/arquivos/'.
+    // Cada tela completa com a sua subpasta ('pasta_fotos' em config/tabelas.php):
+    //   domicilio/, socio_juridico/, caracterizacao/
+    // Valores já gravados como URL completa (http://...) ou caminho com '/' no
+    // início são usados como estão.
+    'fotos_base_url' => '/arquivos/',
 
     // ---------------------------------------------------------------
     // Sessão / login.

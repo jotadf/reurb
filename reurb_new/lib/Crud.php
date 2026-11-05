@@ -638,6 +638,29 @@ class Crud
     /* Exibição                                                          */
     /* ================================================================ */
 
+    /** Pasta (no site) das fotos desta tela, com barra no fim. Ex.: '/arquivos/domicilio/'. */
+    public function baseFotos(): string
+    {
+        $base  = rtrim((string) cfg('fotos_base_url', ''), '/');
+        $pasta = trim((string) ($this->cfg['pasta_fotos'] ?? ''), '/');
+        $url   = $base . '/' . ($pasta !== '' ? $pasta . '/' : '');
+        return $url === '/' && $base === '' && $pasta === '' ? '' : $url;
+    }
+
+    /** Endereço de uma foto a partir do valor gravado (nome do arquivo). */
+    public function urlFoto(?string $valor): string
+    {
+        $v = trim((string) $valor);
+        if ($v === '') {
+            return '';
+        }
+        if (preg_match('#^([a-z][a-z0-9+.\-]*:|//|/)#i', $v)) {
+            return $v;   // já é URL completa ou caminho a partir da raiz
+        }
+        // Codifica cada parte (nomes com espaço ou acento), mantendo as barras
+        return $this->baseFotos() . implode('/', array_map('rawurlencode', explode('/', $v)));
+    }
+
     /** Formata um valor para a listagem / leitura. */
     public function exibir(string $campo, $valor): string
     {

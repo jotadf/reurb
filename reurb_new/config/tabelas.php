@@ -21,6 +21,7 @@
  *
  * Chaves da tela:
  *   tabela, titulo (menu/lista), ficha (título do formulário), icone (Font Awesome 5),
+ *   pasta_fotos (subpasta das fotos dentro de 'fotos_base_url'),
  *   pk, lista (colunas da listagem), busca (colunas da pesquisa),
  *   ordem (ORDER BY padrão), filtros (colunas aceitas como filtro via URL),
  *   secoes (agrupamento visual), relacionados (registros ligados), somente_leitura
@@ -36,6 +37,7 @@ return [
 
     'selagem' => [
         'tabela' => 'selagem_lotes_import',
+        'pasta_fotos' => '',            // fotos da selagem: pasta ainda não definida (fica em /arquivos/)
         'titulo' => 'Selagens',
         'ficha'  => 'Ficha de Selagem de Lote',
         'icone'  => 'fa-id-card',
@@ -70,6 +72,7 @@ return [
 
     'domicilios' => [
         'tabela' => 'domicilios_import',
+        'pasta_fotos' => 'domicilio',    // ~/www/arquivos/domicilio
         'titulo' => 'Domicílios',
         'ficha'  => 'Ficha de Domicílio',
         'icone'  => 'fa-home',
@@ -120,6 +123,7 @@ return [
 
     'socio' => [
         'tabela' => 'cadastro_sociojuridico_import',
+        'pasta_fotos' => 'socio_juridico', // ~/www/arquivos/socio_juridico
         'titulo' => 'Sócio jurídicos',
         'ficha'  => 'Ficha de Cadastro Sociojurídico',
         'icone'  => 'fa-balance-scale',
@@ -203,6 +207,7 @@ return [
 
     'caracterizacao' => [
         'tabela' => 'caracterizacao_vulnerabilidade_import',
+        'pasta_fotos' => 'caracterizacao', // ~/www/arquivos/caracterizacao
         'titulo' => 'Caracterizações',
         'ficha'  => 'Ficha de Caracterização de Vulnerabilidade',
         'icone'  => 'fa-building',

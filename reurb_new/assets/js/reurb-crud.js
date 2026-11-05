@@ -24,9 +24,19 @@
             if ($i.data('link-modo') === 'ref') {
                 href = base + encodeURIComponent(v);                       // ficha de outra tabela
             } else {
-                href = /^(https?:)?\/\//i.test(v) || v.charAt(0) === '/' ? v : base + v;   // foto
+                // foto: nome do arquivo dentro da pasta da tela (cada parte codificada, como no servidor)
+                href = /^([a-z][a-z0-9+.\-]*:|\/\/|\/)/i.test(v) ? v
+                     : base + v.split('/').map(encodeURIComponent).join('/');
             }
             $a.removeClass('disabled').removeAttr('aria-disabled').attr('href', href);
+        }
+        // Atualiza a miniatura da foto
+        if ($i.data('link-modo') === 'foto') {
+            var $p = $('[data-previa-de="' + $i.attr('id') + '"]');
+            var url = v === '' ? '' : $a.attr('href');
+            $p.toggleClass('vazia', url === '').removeClass('sem-imagem');
+            $p.find('a').attr('href', url || '#');
+            $p.find('img').attr('src', url);
         }
     });
 
