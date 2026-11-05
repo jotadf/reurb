@@ -55,6 +55,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         ->execute([password_hash($senha, PASSWORD_DEFAULT), $u['id']]);
                 }
             }
+            // Sessão nova e limpa: nada do usuário anterior pode sobrar
+            $_SESSION = [];
             session_regenerate_id(true);
             $_SESSION[cfg('sessao_id_usuario')]   = (int) $u['id'];
             $_SESSION[cfg('sessao_nome_usuario')] = $u['nome'];
@@ -101,6 +103,18 @@ $tema = rtrim((string) cfg('tema_base'), '/') . '/';
                         <i class="fas fa-desktop fa-2x text-primary"></i>
                         <h1 class="h4 text-gray-900 mt-2"><?= e(cfg('app_nome')) ?></h1>
                     </div>
+                    <?php
+                    $conectado = '';
+                    if ($_SERVER['REQUEST_METHOD'] !== 'POST' && usuario_id() !== null) {
+                        try { $conectado = usuario_nome(); } catch (Throwable $e) { $conectado = ''; }
+                    }
+                    if ($conectado !== ''): ?>
+                        <div class="alert alert-info small">
+                            Você ainda está conectado como <strong><?= e($conectado) ?></strong>.
+                            Ao entrar com outro usuário, essa sessão é encerrada.
+                            <a href="logout.php">Sair agora</a>
+                        </div>
+                    <?php endif; ?>
                     <?php foreach (flashes() as $f): ?>
                         <div class="alert alert-<?= e($f['tipo']) ?> small"><?= e($f['msg']) ?></div>
                     <?php endforeach; ?>

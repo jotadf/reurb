@@ -16,7 +16,16 @@ date_default_timezone_set(cfg('fuso_horario', 'America/Sao_Paulo'));
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_set_cookie_params(['httponly' => true, 'samesite' => 'Lax']);
+    session_cache_limiter('');   // cabeçalhos de cache definidos logo abaixo, sem depender do php.ini
     session_start();
+}
+
+// Páginas logadas nunca podem ser guardadas pelo navegador ou por proxy:
+// senão, depois de trocar de usuário, aparece a página guardada do anterior.
+if (PHP_SAPI !== 'cli' && !headers_sent()) {
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+    header('Pragma: no-cache');
+    header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
 }
 
 require_once __DIR__ . '/Crud.php';
@@ -136,7 +145,38 @@ function usuario_id(): ?int
 
 function usuario_nome(): string
 {
+    // Nome lido do banco pelo ID da sessão (nunca fica desatualizado)
+    if (function_exists('usuario_atual') && usuario_id() !== null) {
+        try {
+            $u = usuario_atual();
+            if ($u !== null) {
+                return (string) $u['nome'];
+            }
+        } catch (Throwable $e) {
+            // sem banco: usa o nome guardado na sessão
+        }
+    }
     return (string) ($_SESSION[cfg('sessao_nome_usuario')] ?? '');
+}
+
+/** Encerra a sessão por completo: apaga os dados, o arquivo e o cookie. */
+function encerrar_sessao(): void
+{
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $p = session_get_cookie_params();
+        setcookie(session_name(), '', [
+            'expires'  => time() - 42000,
+            'path'     => $p['path'],
+            'domain'   => $p['domain'],
+            'secure'   => $p['secure'],
+            'httponly' => $p['httponly'],
+            'samesite' => $p['samesite'] ?: 'Lax',
+        ]);
+    }
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_destroy();
+    }
 }
 
 function exigir_login(): void
