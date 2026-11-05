@@ -386,6 +386,10 @@ class Crud
                 continue;
             }
 
+            // Na alteração, campo que não veio no envio fica como está no banco
+            if (!$novo && !array_key_exists($nome, $entrada)) {
+                continue;
+            }
             $bruto = $entrada[$nome] ?? null;
             if (is_array($bruto)) {
                 $erros[$nome] = 'Valor inválido.';

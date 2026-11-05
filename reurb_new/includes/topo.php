@@ -12,7 +12,7 @@ $T          = $GLOBALS['TABELAS'];
 
 /** Item do menu apontando para uma tela de CRUD */
 $itemCrud = function (string $chave, ?string $texto = null) use ($menuAtivo, $T): string {
-    if (!isset($T[$chave])) {
+    if (!isset($T[$chave]) || !pode($chave, 'ver')) {
         return '';
     }
     $ativo = $menuAtivo === $chave ? ' active' : '';
@@ -21,6 +21,9 @@ $itemCrud = function (string $chave, ?string $texto = null) use ($menuAtivo, $T)
 };
 /** Item do menu apontando para uma tela já existente no sistema */
 $itemLink = function (string $chaveLink, string $icone, string $texto) use ($links): string {
+    if (!pode_link_externo($chaveLink)) {
+        return '';
+    }
     return '<li class="nav-item"><a class="nav-link" href="' . e($links[$chaveLink] ?? '#') . '">'
          . '<i class="fas fa-fw ' . e($icone) . '"></i> <span>' . e($texto) . '</span></a></li>';
 };
@@ -51,30 +54,32 @@ $itemLink = function (string $chaveLink, string $icone, string $texto) use ($lin
 
         <hr class="sidebar-divider my-0">
 
-        <hr class="sidebar-divider">
-        <div class="sidebar-heading">Gestão de Acesso</div>
-        <?= $itemCrud('perfil') ?>
-        <?= $itemCrud('equipe') ?>
-        <?= $itemCrud('usuario') ?>
-        <?= $itemCrud('auditoria') ?>
-
-        <hr class="sidebar-divider">
-        <div class="sidebar-heading">Importação da Coleta</div>
-        <?= $itemLink('importar_dados', 'fa-id-card', 'Importar Dados') ?>
-        <?= $itemLink('gerenciar_imagens', 'fa-file-image', 'Gerenciar Imagens') ?>
-
-        <hr class="sidebar-divider">
-        <div class="sidebar-heading">Edição de Dados</div>
-        <?= $itemCrud('selagem') ?>
-        <?= $itemCrud('domicilios') ?>
-        <?= $itemCrud('socio') ?>
-        <?= $itemCrud('caracterizacao') ?>
-
-        <hr class="sidebar-divider">
-        <div class="sidebar-heading">Relatório</div>
-        <?= $itemLink('gerar_relatorio', 'fa-file-excel', 'Gerar Relatório') ?>
-        <?= $itemLink('selagens_sem_socio', 'fa-file-excel', 'Listagem de Selagens Sem Sócio Jurídico') ?>
-        <?= $itemLink('caract_sem_selagem', 'fa-file-excel', 'Listagem de Caracterizações Sem Selagem') ?>
+        <?php
+        // Cada grupo do menu só aparece se o perfil tiver pelo menos um item nele
+        $grupos = [
+            'Gestão de Acesso'     => $itemCrud('perfil') . $itemCrud('equipe') . $itemCrud('usuario') . $itemCrud('auditoria'),
+            'Importação da Coleta' => $itemLink('importar_dados', 'fa-id-card', 'Importar Dados')
+                                    . $itemLink('gerenciar_imagens', 'fa-file-image', 'Gerenciar Imagens'),
+            'Edição de Dados'      => $itemCrud('selagem') . $itemCrud('domicilios') . $itemCrud('socio') . $itemCrud('caracterizacao'),
+            'Relatório'            => $itemLink('gerar_relatorio', 'fa-file-excel', 'Gerar Relatório')
+                                    . $itemLink('selagens_sem_socio', 'fa-file-excel', 'Listagem de Selagens Sem Sócio Jurídico')
+                                    . $itemLink('caract_sem_selagem', 'fa-file-excel', 'Listagem de Caracterizações Sem Selagem'),
+        ];
+        // Para quem só visualiza, o grupo de dados não é de "edição"
+        if (!pode('selagem', 'alterar') && !pode('domicilios', 'alterar') && !pode('socio', 'alterar') && !pode('caracterizacao', 'alterar')) {
+            $grupos = array_combine(
+                array_map(fn($g) => $g === 'Edição de Dados' ? 'Dados da Coleta' : $g, array_keys($grupos)),
+                array_values($grupos)
+            );
+        }
+        foreach ($grupos as $tituloGrupo => $itens):
+            if ($itens === '') {
+                continue;
+            } ?>
+            <hr class="sidebar-divider">
+            <div class="sidebar-heading"><?= e($tituloGrupo) ?></div>
+            <?= $itens ?>
+        <?php endforeach; ?>
 
         <hr class="sidebar-divider d-none d-md-block">
         <div class="text-center d-none d-md-inline">
@@ -99,6 +104,10 @@ $itemLink = function (string $chaveLink, string $icone, string $texto) use ($lin
                             <i class="fas fa-user-circle fa-2x text-gray-400"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
+                            <span class="dropdown-item-text small text-gray-600">
+                                <i class="fas fa-user-shield fa-sm fa-fw mr-2 text-gray-400"></i>Perfil: <strong><?= e(perfil_nome() ?: '—') ?></strong>
+                            </span>
+                            <div class="dropdown-divider"></div>
                             <a class="dropdown-item" href="logout.php">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Sair
                             </a>

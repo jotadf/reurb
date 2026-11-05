@@ -10,6 +10,7 @@ define('RAIZ', dirname(__DIR__));
 
 $GLOBALS['CONFIG']  = require RAIZ . '/config/config.php';
 $GLOBALS['TABELAS'] = require RAIZ . '/config/tabelas.php';
+$GLOBALS['PERMISSOES'] = require RAIZ . '/config/permissoes.php';
 
 date_default_timezone_set(cfg('fuso_horario', 'America/Sao_Paulo'));
 
@@ -20,6 +21,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 require_once __DIR__ . '/Crud.php';
 require_once __DIR__ . '/senha.php';
+require_once __DIR__ . '/acesso.php';
 
 /* ------------------------------------------------------------------ */
 /* Configuração                                                        */
@@ -140,6 +142,14 @@ function usuario_nome(): string
 function exigir_login(): void
 {
     if (usuario_id() === null) {
+        redirecionar(cfg('pagina_login', 'login.php'));
+    }
+    // Usuário excluído ou inativado depois de entrar: encerra a sessão
+    $u = usuario_atual();
+    if ($u === null || (string) $u['ativo'] !== '1') {
+        $_SESSION = [];
+        session_regenerate_id(true);
+        flash('warning', 'Seu acesso foi desativado. Procure um administrador.');
         redirecionar(cfg('pagina_login', 'login.php'));
     }
 }

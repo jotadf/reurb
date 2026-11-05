@@ -101,6 +101,9 @@ $tema = rtrim((string) cfg('tema_base'), '/') . '/';
                         <i class="fas fa-desktop fa-2x text-primary"></i>
                         <h1 class="h4 text-gray-900 mt-2"><?= e(cfg('app_nome')) ?></h1>
                     </div>
+                    <?php foreach (flashes() as $f): ?>
+                        <div class="alert alert-<?= e($f['tipo']) ?> small"><?= e($f['msg']) ?></div>
+                    <?php endforeach; ?>
                     <?php if ($erro): ?><div class="alert alert-danger small"><?= e($erro) ?></div><?php endif; ?>
                     <?php if ($motivo !== '' && $mostrarDiagnostico): ?>
                         <div class="alert alert-warning small"><strong>Diagnóstico:</strong> <?= e($motivo) ?></div>

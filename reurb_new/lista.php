@@ -10,6 +10,11 @@ exigir_login();
 $t    = $_GET['t'] ?? null;
 $crud = crud_ou_404(is_string($t) ? $t : null);
 
+exigir_permissao($crud->chave, 'ver');
+$podeIncluir = !$crud->somenteLeitura && pode($crud->chave, 'incluir');
+$podeAlterar = !$crud->somenteLeitura && pode($crud->chave, 'alterar');
+$podeExcluir = !$crud->somenteLeitura && pode($crud->chave, 'excluir');
+
 $busca  = trim((string) ($_GET['q'] ?? ''));
 $ordem  = isset($_GET['o']) && is_string($_GET['o']) ? $_GET['o'] : null;
 $dir    = ($_GET['d'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
@@ -45,7 +50,7 @@ require __DIR__ . '/includes/topo.php';
 <div class="card card-reurb shadow mb-4 reurb-lista">
     <div class="card-header">
         <h6><i class="fas <?= e($crud->cfg['icone'] ?? 'fa-table') ?>"></i><?= e($crud->cfg['titulo']) ?> - <?= e(cfg('nome_ocupacao')) ?></h6>
-        <?php if (!$crud->somenteLeitura): ?>
+        <?php if ($podeIncluir): ?>
             <a href="<?= e(url('form.php', array_merge(['t' => $crud->chave], $filtros))) ?>" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-plus"></i> Novo registro
             </a>
@@ -117,10 +122,10 @@ require __DIR__ . '/includes/topo.php';
                             <td><?php if ($c === $crud->pk): ?><a href="<?= e($link) ?>"><?= e($crud->exibir($c, $l[$c])) ?></a><?php else: ?><?= e($crud->exibir($c, $l[$c])) ?><?php endif; ?></td>
                         <?php endforeach; ?>
                         <td class="col-acoes">
-                            <a href="<?= e($link) ?>" class="btn btn-primary btn-sm" title="<?= $crud->somenteLeitura ? 'Ver' : 'Editar' ?>">
-                                <i class="fas <?= $crud->somenteLeitura ? 'fa-eye' : 'fa-edit' ?>"></i>
+                            <a href="<?= e($link) ?>" class="btn btn-primary btn-sm" title="<?= $podeAlterar ? 'Editar' : 'Ver' ?>">
+                                <i class="fas <?= $podeAlterar ? 'fa-edit' : 'fa-eye' ?>"></i>
                             </a>
-                            <?php if (!$crud->somenteLeitura): ?>
+                            <?php if ($podeExcluir): ?>
                                 <button type="button" class="btn btn-danger btn-sm" title="Excluir"
                                         data-excluir-t="<?= e($crud->chave) ?>" data-excluir-id="<?= e($id) ?>"
                                         data-excluir-desc="<?= e($crud->campos[$crud->pk]['label'] . ' ' . $id) ?>">

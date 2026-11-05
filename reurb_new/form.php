@@ -16,9 +16,20 @@ $novo   = $id === null;
 $erros  = [];
 $linha  = null;
 
-if ($novo && $crud->somenteLeitura) {
-    redirecionar(url('lista.php', ['t' => $crud->chave]));
+// Permissões do perfil logado nesta tela
+exigir_permissao($crud->chave, 'ver');
+$podeIncluir = !$crud->somenteLeitura && pode($crud->chave, 'incluir');
+$podeAlterar = !$crud->somenteLeitura && pode($crud->chave, 'alterar');
+$podeExcluir = !$crud->somenteLeitura && pode($crud->chave, 'excluir');
+
+if ($novo && !$podeIncluir) {
+    if ($crud->somenteLeitura) {
+        redirecionar(url('lista.php', ['t' => $crud->chave]));
+    }
+    exigir_permissao($crud->chave, 'incluir');
 }
+// Ficha só para leitura: tela somente-leitura ou perfil sem permissão de alterar
+$leitura = $crud->somenteLeitura || (!$novo && !$podeAlterar);
 
 if (!$novo) {
     $linha = $crud->buscar($id);
@@ -29,7 +40,11 @@ if (!$novo) {
 }
 
 /* ---------------- Gravação ---------------- */
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$crud->somenteLeitura) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($crud->somenteLeitura) {
+        redirecionar(url('form.php', ['t' => $crud->chave, 'id' => $id]));
+    }
+    exigir_permissao($crud->chave, $novo ? 'incluir' : 'alterar');
     csrf_validar();
     try {
         if ($novo) {
@@ -37,6 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$crud->somenteLeitura) {
             flash('success', 'Registro incluído com sucesso.');
             redirecionar(url('form.php', ['t' => $crud->chave, 'id' => $novoId]));
         }
+        proteger_ultimo_admin($crud, $id, $_POST);
         $mudou = $crud->atualizar($id, $_POST);
         flash($mudou ? 'success' : 'info', $mudou ? 'Alterações salvas com sucesso.' : 'Nenhuma alteração para salvar.');
         redirecionar(url('form.php', ['t' => $crud->chave, 'id' => $id]));
@@ -78,6 +94,9 @@ require __DIR__ . '/includes/topo.php';
             <h6>
                 <i class="fas fa-edit"></i><?= e($tituloFicha) ?> - <?= e(cfg('nome_ocupacao')) ?>
                 <?php if ($novo): ?><span class="badge badge-light ml-2">Novo</span><?php endif; ?>
+                <?php if ($leitura && !$crud->somenteLeitura): ?>
+                    <span class="badge badge-light ml-2"><i class="fas fa-eye fa-sm"></i> Somente visualização</span>
+                <?php endif; ?>
             </h6>
             <a href="<?= e(url('lista.php', ['t' => $crud->chave])) ?>" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-arrow-left"></i> Voltar
@@ -92,7 +111,7 @@ require __DIR__ . '/includes/topo.php';
             foreach ($crud->secoes() as $titulo => $campos) {
                 $html = '';
                 foreach ($campos as $nome) {
-                    $html .= campo_html($crud, $nome, $linha[$nome] ?? null, $novo, $erros[$nome] ?? null, $crud->somenteLeitura);
+                    $html .= campo_html($crud, $nome, $linha[$nome] ?? null, $novo, $erros[$nome] ?? null, $leitura);
                 }
                 if ($html !== '') {
                     $secoesHtml[$titulo]  = $html;
@@ -163,9 +182,9 @@ require __DIR__ . '/includes/topo.php';
                 </div>
             <?php endif; ?>
 
-            <?php if (!$crud->somenteLeitura): ?>
+            <?php if (!$leitura || (!$novo && $podeExcluir)): ?>
             <div class="reurb-rodape-ficha">
-                <?php if (!$novo && !$crud->somenteLeitura): ?>
+                <?php if (!$novo && $podeExcluir): ?>
                     <button type="button" class="btn btn-outline-danger"
                             data-excluir-t="<?= e($crud->chave) ?>" data-excluir-id="<?= e($id) ?>"
                             data-excluir-desc="<?= e($crud->campos[$crud->pk]['label'] . ' ' . $id) ?>">
@@ -173,7 +192,7 @@ require __DIR__ . '/includes/topo.php';
                     </button>
                 <?php endif; ?>
                 <div class="acoes-direita">
-                    <?php if (!$crud->somenteLeitura): ?>
+                    <?php if (!$leitura): ?>
                         <button type="submit" class="btn btn-salvar">
                             <i class="fas fa-save"></i> <?= $novo ? 'Salvar Registro' : 'Salvar Alterações' ?>
                         </button>
@@ -187,6 +206,9 @@ require __DIR__ . '/includes/topo.php';
     <?php foreach ($relacionados as $r):
         /** @var Crud $outro */
         $outro = $r['crud'];
+        if (!pode($outro->chave, 'ver')) {
+            continue;
+        }
         $cols  = $outro->colunasLista();
         ?>
         <div class="card shadow-sm mt-4 reurb-relacionados">
@@ -195,7 +217,7 @@ require __DIR__ . '/includes/topo.php';
                     <i class="fas <?= e($outro->cfg['icone'] ?? 'fa-table') ?> mr-1"></i>
                     <?= e($r['rel']['titulo']) ?> <span class="badge badge-primary"><?= count($r['linhas']) ?></span>
                 </h6>
-                <?php if (!$outro->somenteLeitura): ?>
+                <?php if (!$outro->somenteLeitura && pode($outro->chave, 'incluir')): ?>
                     <a class="btn btn-primary btn-sm"
                        href="<?= e(url('form.php', ['t' => $outro->chave, $r['rel']['coluna'] => $r['valor']])) ?>">
                         <i class="fas fa-plus"></i> Novo

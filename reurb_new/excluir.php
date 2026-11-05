@@ -16,8 +16,10 @@ $id   = $_POST['id'] ?? '';
 if ($crud->somenteLeitura || !is_string($id) || $id === '') {
     redirecionar(url('lista.php', ['t' => $crud->chave]));
 }
+exigir_permissao($crud->chave, 'excluir');
 
 try {
+    proteger_ultimo_admin($crud, $id, null);
     $crud->excluir($id);
     flash('success', 'Registro excluído com sucesso.');
     redirecionar(url('lista.php', ['t' => $crud->chave]));

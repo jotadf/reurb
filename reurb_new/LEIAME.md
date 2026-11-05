@@ -44,6 +44,46 @@ no mesmo visual da "Ficha de Selagem de Lote".
   o sistema atual aceitar `password_hash`, use `'senha_formato' => 'password_hash'` e
   `'converter_senha_no_login' => true` para migrar as senhas aos poucos, a cada login.
 
+## Perfis de acesso
+
+As regras ficam em `config/permissoes.php` e valem pelo **nome** cadastrado na tabela
+`perfil`, sem diferença de maiúsculas ou acentos ("Usuário" = "usuario").
+
+| Perfil | Gestão de Acesso (perfis, equipes, usuários, auditoria) | Selagem, Domicílios, Sócio jurídico, Caracterização |
+|---|---|---|
+| Administrador | ver, incluir, alterar, excluir | ver, incluir, alterar, excluir |
+| Usuário | sem acesso | ver, incluir, alterar, excluir |
+| Observador | sem acesso | só ver |
+| qualquer outro nome | sem acesso | sem acesso |
+
+- A permissão é verificada no servidor em cada página e em cada gravação, não só
+  escondida no menu. Uma tentativa sem permissão mostra a página "403 – Acesso negado".
+- O menu e os botões (Novo, Editar, Excluir, Salvar) aparecem conforme o perfil. Para o
+  Observador, a ficha abre com o selo "Somente visualização" e todos os campos bloqueados.
+- O perfil é lido do banco a cada página: trocar o perfil de alguém ou inativá-lo vale na
+  hora. Um usuário inativado com a sessão aberta é desconectado no próximo clique.
+- O sistema não deixa ficar sem Administrador: o último Administrador ativo não pode ser
+  excluído, inativado nem ter o perfil trocado.
+- Para tirar do perfil Usuário a permissão de excluir, troque `$TUDO` por
+  `['ver', 'incluir', 'alterar']` na linha dele.
+- Se renomear um perfil na tabela `perfil`, renomeie também em `config/permissoes.php`
+  (ou use o ID do perfil como chave).
+
+### Proteger telas existentes
+
+Os itens de menu Importar Dados, Gerenciar Imagens e os relatórios apontam para telas do
+sistema atual. `menu_externo` em `config/permissoes.php` só esconde esses links. Para
+bloquear a tela em si, coloque no início dela (ajuste o caminho até a pasta do CRUD):
+
+```php
+require __DIR__ . '/reurb_crud/lib/bootstrap.php';
+exigir_login();
+if (!pode_link_externo('importar_dados')) {   // mesma chave usada em menu_externo
+    http_response_code(403);
+    exit('Acesso negado.');
+}
+```
+
 ## Endereços
 
 - `lista.php?t=selagem` — listagem com pesquisa, ordenação por coluna e paginação
@@ -96,7 +136,5 @@ Chaves de `t`: `selagem`, `domicilios`, `socio`, `caracterizacao`, `perfil`, `eq
   importado que não esteja na lista continua aparecendo e é preservado.
 - **Campos Sim/Não** gravam `sim`/`nao` (padrão do Kobo). Se o banco já tiver
   "Sim"/"SIM", o valor é reconhecido e mantido como está.
-- **Permissões por perfil** não foram implementadas: qualquer usuário logado acessa
-  todas as telas.
 - Para a auditoria ficar rápida com muitos registros, crie um índice:
   `CREATE INDEX ix_auditoria_tabela ON auditoria (tabela, atualizado);`

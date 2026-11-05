@@ -5,6 +5,9 @@ exigir_login();
 
 $cards = [];
 foreach ($GLOBALS['TABELAS'] as $chave => $cfgTabela) {
+    if (!pode($chave, 'ver')) {
+        continue;
+    }
     try {
         $total = (int) db()->query('SELECT COUNT(*) FROM `' . str_replace('`', '``', $cfgTabela['tabela']) . '`')->fetchColumn();
     } catch (Throwable $e) {
@@ -21,6 +24,13 @@ require __DIR__ . '/includes/topo.php';
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800"><?= e(cfg('nome_ocupacao')) ?></h1>
 </div>
+
+<?php if (!$cards): ?>
+    <div class="alert alert-warning">
+        Seu perfil (<?= e(perfil_nome() ?: 'sem perfil') ?>) não tem acesso a nenhuma tela.
+        Peça a um administrador para ajustar seu perfil.
+    </div>
+<?php endif; ?>
 
 <div class="row">
     <?php foreach ($cards as $c): ?>
