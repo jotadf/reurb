@@ -39,8 +39,9 @@ function senha_confere(string $digitada, string $gravado): bool
 {
     $configurado = (string) cfg('senha_formato', 'auto');
     if ($configurado === 'texto') {
-        // Comparação exata, sem trim: espaços fazem parte da senha
-        return $gravado !== '' && hash_equals($gravado, $digitada);
+        // Desconsidera espaços/quebras de linha nas pontas (comuns em dados importados)
+        $g = trim($gravado);
+        return $g !== '' && hash_equals($g, trim($digitada));
     }
     $gravado = trim($gravado);
     $formato = $configurado === 'auto' ? senha_detectar_formato($gravado) : $configurado;
@@ -61,6 +62,32 @@ function senha_confere(string $digitada, string $gravado): bool
         default:
             return false;
     }
+}
+
+/**
+ * Explica por que a senha não conferiu, SEM mostrar a senha gravada.
+ * Usado só no diagnóstico do login.
+ */
+function senha_explicar_diferenca(string $digitada, string $gravado): string
+{
+    $configurado = (string) cfg('senha_formato', 'auto');
+    $formatoBanco = senha_detectar_formato($gravado);
+    if ($formatoBanco === 'vazia') {
+        return 'A senha gravada no banco está vazia.';
+    }
+    if ($configurado === 'texto' && $formatoBanco !== 'texto') {
+        return 'A configuração diz senha sem criptografia, mas o valor gravado parece ' . $formatoBanco
+             . ' (' . strlen(trim($gravado)) . ' caracteres). Use \'senha_formato\' => \'auto\'.';
+    }
+    if ($formatoBanco !== 'texto') {
+        return 'Formato no banco: ' . $formatoBanco . '. Se o sistema atual usa outra regra (ex.: senha com "sal"), informe qual.';
+    }
+    $g = trim($gravado);
+    $d = trim($digitada);
+    if (mb_strtolower($g) === mb_strtolower($d)) {
+        return 'A diferença é só de letras maiúsculas/minúsculas.';
+    }
+    return 'Digitada com ' . mb_strlen($d) . ' caractere(s); gravada com ' . mb_strlen($g) . ' caractere(s).';
 }
 
 /** Gera o valor a gravar no formato pedido. */

@@ -18,26 +18,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $senha = (string) ($_POST['senha'] ?? '');
     $cpf   = preg_replace('/\D/', '', $login);
 
+    $erroBanco = false;
     try {
+        // Busca TODOS os usuários com esse e-mail ou CPF (o CPF pode estar repetido na tabela)
         $st = db()->prepare('SELECT id, nome, senha, ativo FROM usuario
-                              WHERE email = ? OR (? <> \'\' AND REPLACE(REPLACE(REPLACE(cpf, \'.\', \'\'), \'-\', \'\'), \' \', \'\') = ?)
-                              LIMIT 1');
+                              WHERE TRIM(email) = ?
+                                 OR (? <> \'\' AND REPLACE(REPLACE(REPLACE(REPLACE(cpf, \'.\', \'\'), \'-\', \'\'), \' \', \'\'), \'/\', \'\') = ?)
+                              ORDER BY ativo DESC, id DESC');
         $st->execute([$login, $cpf, $cpf]);
-        $u = $st->fetch();
+        $encontrados = $st->fetchAll();
 
-        if (!$u) {
-            $motivo = 'Nenhum usuário encontrado com esse e-mail ou CPF.';
-        } elseif ((string) $u['ativo'] !== '1') {
-            $motivo = 'Usuário encontrado (id ' . $u['id'] . '), mas está inativo (ativo = ' . var_export($u['ativo'], true) . ').';
-        } elseif (!senha_confere($senha, (string) $u['senha'])) {
-            $gravado = trim((string) $u['senha']);
-            $formatoCfg = (string) cfg('senha_formato', 'auto');
-            $motivo = 'Usuário encontrado (id ' . $u['id'] . '), mas a senha não confere. '
-                    . ($formatoCfg === 'auto'
-                        ? 'Formato reconhecido no banco: ' . senha_detectar_formato($gravado)
-                        : 'Formato configurado: ' . $formatoCfg)
-                    . ' (senha gravada com ' . strlen((string) $u['senha']) . ' caracteres). '
-                    . 'Se o sistema atual usa outra regra (ex.: senha com "sal"), me informe qual.';
+        $u = null;
+        $detalhes = [];
+        foreach ($encontrados as $c) {
+            if ((string) $c['ativo'] !== '1') {
+                $detalhes[] = 'id ' . $c['id'] . ': inativo (ativo = ' . var_export($c['ativo'], true) . ')';
+            } elseif (!senha_confere($senha, (string) $c['senha'])) {
+                $detalhes[] = 'id ' . $c['id'] . ': senha não confere. ' . senha_explicar_diferenca($senha, (string) $c['senha']);
+            } else {
+                $u = $c;
+                break;
+            }
+        }
+
+        if (!$encontrados) {
+            $motivo = 'Nenhum usuário encontrado com o e-mail ou CPF "' . $login . '"'
+                    . ($cpf !== '' ? ' (CPF pesquisado só com números: ' . $cpf . ')' : '') . '.';
+        } elseif ($u === null) {
+            $motivo = count($encontrados) . ' usuário(s) encontrado(s). ' . implode(' | ', $detalhes);
         } else {
             // Login correto
             if (cfg('converter_senha_no_login', false)) {
@@ -53,12 +61,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             redirecionar('index.php');
         }
     } catch (PDOException $e) {
-        $motivo = 'Erro ao consultar o banco: ' . $e->getMessage();
+        $erroBanco = true;
+        $c = cfg('db');
+        $motivo = 'Erro no banco de dados (host ' . $c['host'] . ', banco ' . $c['banco'] . ', usuário ' . $c['usuario'] . '): '
+                . $e->getMessage();
     }
 
     error_log('[REURB login] ' . $login . ': ' . $motivo);
-    $erro = 'Usuário ou senha inválidos.';
+    // Falha de conexão não é culpa do usuário: mostra uma mensagem diferente
+    $erro = $erroBanco
+        ? 'Não foi possível acessar o banco de dados. Verifique a conexão em config/config.php.'
+        : 'Usuário ou senha inválidos.';
 }
+
+// Diagnóstico: true = sempre; 'local' = só quando acessado do próprio servidor; false = nunca
+$diag = cfg('login_diagnostico', 'local');
+$ipCliente = $_SERVER['REMOTE_ADDR'] ?? '';
+$mostrarDiagnostico = $diag === true
+    || ($diag === 'local' && in_array($ipCliente, ['127.0.0.1', '::1'], true));
 $tema = rtrim((string) cfg('tema_base'), '/') . '/';
 ?>
 <!DOCTYPE html>
@@ -82,7 +102,7 @@ $tema = rtrim((string) cfg('tema_base'), '/') . '/';
                         <h1 class="h4 text-gray-900 mt-2"><?= e(cfg('app_nome')) ?></h1>
                     </div>
                     <?php if ($erro): ?><div class="alert alert-danger small"><?= e($erro) ?></div><?php endif; ?>
-                    <?php if ($motivo !== '' && cfg('login_diagnostico', false)): ?>
+                    <?php if ($motivo !== '' && $mostrarDiagnostico): ?>
                         <div class="alert alert-warning small"><strong>Diagnóstico:</strong> <?= e($motivo) ?></div>
                     <?php endif; ?>
                     <form method="post" class="user">

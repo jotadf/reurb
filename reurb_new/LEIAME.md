@@ -34,10 +34,12 @@ no mesmo visual da "Ficha de Selagem de Lote".
 - Para mudar depois: `'auto'` reconhece sozinho o formato de cada senha gravada
   (`password_hash`, MD5, SHA1, SHA256, SHA512 ou texto) e grava no mesmo formato;
   também dá para fixar um deles, ex.: `'password_hash'`.
-- Se o login falhar, coloque `'login_diagnostico' => true` em `config/config.php`, tente
-  de novo e leia o aviso amarelo: ele diz se o usuário não foi encontrado, está inativo
-  ou se a senha não confere (e qual formato foi reconhecido). O motivo também vai para o
-  log de erros do PHP. Depois volte para `false`.
+- Se o login falhar, um aviso amarelo de diagnóstico aparece abaixo do erro quando o
+  sistema é acessado pelo próprio servidor (`localhost`), pois o padrão é
+  `'login_diagnostico' => 'local'`. Ele diz se o usuário não foi encontrado, se está
+  inativo, se a senha difere (sem mostrá-la) ou se houve erro de conexão com o banco.
+  Para ver o aviso acessando de outro computador, use `true`; em produção, use `false`.
+  O motivo também vai sempre para o log de erros do PHP.
 - Senha em texto puro ou MD5/SHA sem "sal" é fácil de descobrir se o banco vazar. Quando
   o sistema atual aceitar `password_hash`, use `'senha_formato' => 'password_hash'` e
   `'converter_senha_no_login' => true` para migrar as senhas aos poucos, a cada login.

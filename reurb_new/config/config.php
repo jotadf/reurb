@@ -58,10 +58,12 @@ return [
     // usuário deixa de conseguir entrar nele.
     'converter_senha_no_login' => false,
 
-    // true = mostra na tela o motivo exato da falha no login (usuário não
-    // encontrado, inativo, formato da senha...). Use só para diagnosticar e
-    // depois volte para false.
-    'login_diagnostico' => false,
+    // Mostra na tela o motivo da falha no login (usuário não encontrado,
+    // inativo, senha diferente, erro de conexão...). A senha nunca é exibida.
+    // 'local' = só quando acessado do próprio servidor (localhost)
+    // true    = sempre (use só para diagnosticar e depois volte)
+    // false   = nunca (recomendado em produção)
+    'login_diagnostico' => 'local',
 
     // Links do menu lateral que pertencem a telas que já existem no seu sistema.
     // Troque '#' pelo arquivo correspondente.
