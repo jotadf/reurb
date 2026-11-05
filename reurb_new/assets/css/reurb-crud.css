@@ -1,0 +1,76 @@
+/* Ajustes do CRUD REURB sobre o tema SB Admin 2 (mesmo visual da Ficha de Selagem) */
+
+/* ---------- Ficha (formulário) ---------- */
+.reurb-ficha-wrap { max-width: 900px; margin: 0 auto 2rem; }
+
+.card-reurb { border: 1px solid #4e73df; border-radius: .35rem; }
+.card-reurb > .card-header {
+    background-color: #4e73df;
+    background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
+    color: #fff;
+    border-bottom: 0;
+    padding: 1rem 1.25rem;
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+}
+.card-reurb > .card-header h6 { margin: 0; font-weight: 700; font-size: 1rem; color: #fff; }
+.card-reurb > .card-header h6 .fas { margin-right: .5rem; }
+.card-reurb > .card-header .btn-outline-light { white-space: nowrap; }
+
+.card-reurb .card-body { padding: 1.25rem 1.25rem .75rem; }
+
+.reurb-ficha label { font-weight: 700; color: #212529; margin-bottom: .45rem; }
+.reurb-ficha label .obrigatorio { color: #e74a3b; margin-left: 2px; }
+.reurb-ficha .form-control { color: #3a3b45; border-color: #d1d3e2; }
+.reurb-ficha .form-control[readonly] { background-color: #eaecf4; }
+.reurb-ficha textarea.form-control { min-height: 62px; }
+.reurb-ficha .form-group { margin-bottom: 1.1rem; }
+
+.reurb-secao {
+    font-size: .8rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em;
+    color: #4e73df; border-bottom: 1px solid #e3e6f0;
+    padding-bottom: .4rem; margin: .75rem 0 1rem;
+}
+.reurb-secao:first-child { margin-top: 0; }
+
+/* Abas da ficha */
+.reurb-abas { border-bottom: 1px solid #d1d3e2; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.reurb-abas .nav-link {
+    color: #5a5c69; font-weight: 600; font-size: .9rem;
+    padding: .55rem .9rem; border-top-left-radius: .35rem; border-top-right-radius: .35rem;
+}
+.reurb-abas .nav-link:hover { color: #224abe; border-color: #eaecf4 #eaecf4 #d1d3e2; }
+.reurb-abas .nav-link.active { color: #4e73df; font-weight: 700; border-color: #d1d3e2 #d1d3e2 #fff; border-top: 3px solid #4e73df; }
+.reurb-abas .badge { font-size: .7rem; vertical-align: text-top; }
+.reurb-abas-conteudo .reurb-secao:first-child { margin-top: 0; }
+.reurb-abas-navegar { display: flex; align-items: center; min-height: 1.5rem; margin-top: -.25rem; }
+.reurb-abas-navegar .btn-link { color: #4e73df; font-weight: 600; text-decoration: none; }
+
+@media (max-width: 575.98px) {
+    /* No celular as abas rolam na horizontal em vez de quebrar em várias linhas */
+    .reurb-abas { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+    .reurb-abas .nav-link { white-space: nowrap; }
+}
+
+.reurb-rodape-ficha {
+    border-top: 1px solid #5a5c69;
+    margin-top: .75rem; padding-top: 1rem;
+    display: flex; justify-content: space-between; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.reurb-rodape-ficha .acoes-direita { margin-left: auto; display: flex; gap: .5rem; }
+
+/* Botão azul vivo como na tela original */
+.btn-salvar { background-color: #0d6efd; border-color: #0d6efd; color: #fff; }
+.btn-salvar:hover, .btn-salvar:focus { background-color: #0b5ed7; border-color: #0a58ca; color: #fff; }
+
+.reurb-json { background: #f8f9fc; border: 1px solid #e3e6f0; border-radius: .35rem; padding: .75rem; font-size: .8rem; max-height: 360px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+
+/* ---------- Listagem ---------- */
+.reurb-lista .table { color: #3a3b45; }
+.reurb-lista .table thead th { white-space: nowrap; border-bottom-width: 1px; font-size: .85rem; }
+.reurb-lista .table thead th a { color: #4e73df; text-decoration: none; }
+.reurb-lista .table td { vertical-align: middle; font-size: .9rem; }
+.reurb-lista .col-acoes { width: 1%; white-space: nowrap; text-align: center; }
+.reurb-lista .pagination { margin-bottom: 0; }
+
+.reurb-relacionados .table td, .reurb-relacionados .table th { font-size: .85rem; }
+.reurb-relacionados .table td:first-child, .reurb-relacionados .table th:first-child { padding-left: 1.25rem; }
