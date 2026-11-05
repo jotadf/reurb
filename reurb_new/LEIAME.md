@@ -155,7 +155,7 @@ Chaves de `t`: `selagem`, `domicilios`, `socio`, `caracterizacao`, `perfil`, `eq
   somente leitura, como na ficha original.
 - Fotos: o banco guarda o nome do arquivo, e o endereço é montado com `fotos_base_url`
   (`config/config.php`, padrão `/arquivos/`, que corresponde a `~/www/arquivos`) mais a
-  pasta da tela (`pasta_fotos` em `config/tabelas.php`): Domicílios → `domicilio/`,
+  pasta da tela (`pasta_fotos` em `config/tabelas.php`): Selagem e Domicílios → `domicilio/`,
   Sócio jurídico → `socio_juridico/`, Caracterização → `caracterizacao/`. Cada campo
   `foto_*` tem um botão para abrir a imagem e mostra uma miniatura, inclusive para o
   Observador; se o arquivo não existir ou não for imagem (ex.: PDF), aparece um aviso.

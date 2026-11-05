@@ -37,7 +37,7 @@ return [
 
     'selagem' => [
         'tabela' => 'selagem_lotes_import',
-        'pasta_fotos' => '',            // fotos da selagem: pasta ainda não definida (fica em /arquivos/)
+        'pasta_fotos' => 'domicilio',    // mesmo formulário do Kobo que os domicílios: ~/www/arquivos/domicilio
         'titulo' => 'Selagens',
         'ficha'  => 'Ficha de Selagem de Lote',
         'icone'  => 'fa-id-card',
