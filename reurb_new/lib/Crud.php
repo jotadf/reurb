@@ -278,6 +278,7 @@ class Crud
                 continue;
             }
             $ind['tabela_rel'] = $outro->tabela;
+            $ind['pk_rel']     = $outro->pk;
             $ind['alias']      = '__ind_' . preg_replace('/\W/', '', $ind['id']);
             $ind['declarado']  = isset($ind['declarado'], $this->campos[$ind['declarado']]) ? $ind['declarado'] : null;
             $saida[$ind['id']] = $ind;
@@ -552,6 +553,15 @@ class Crud
                 continue;
             }
 
+            // Vínculo (ex.: código do selo): o valor NOVO precisa existir na outra tela.
+            // Valor que já estava gravado não é cobrado, para não travar a edição dos outros campos.
+            $mudouVinculo = $novo || $atual === null || (string) ($atual[$nome] ?? '') !== $v;
+            if ($c['tipo'] === 'ref' && $mudouVinculo && !$this->vinculoExiste($nome, $v)) {
+                $destino = $GLOBALS['TABELAS'][$c['ref']] ?? null;
+                $erros[$nome] = '"' . $v . '" não existe em ' . ($destino['titulo'] ?? $c['ref']) . '.';
+                continue;
+            }
+
             $valores[$nome] = $v;
         }
 
@@ -655,6 +665,19 @@ class Crud
             $pdo->rollBack();
             throw self::traduzirErro($e);
         }
+    }
+
+    /** O valor de um campo de vínculo ('ref') existe como chave na tela de destino? */
+    public function vinculoExiste(string $campo, $valor): bool
+    {
+        $ref = $this->campos[$campo]['ref'] ?? null;
+        if ($ref === null || !isset($GLOBALS['TABELAS'][$ref])) {
+            return true;
+        }
+        if ($valor === null || $valor === '') {
+            return false;
+        }
+        return (new Crud($ref, $GLOBALS['TABELAS'][$ref]))->buscar($valor) !== null;
     }
 
     /** Lê a data no formato indicado sem aceitar valores "estourados" (ex.: 31/02). */

@@ -25,6 +25,8 @@
  *   indicadores (colunas de situação na listagem: quantos registros de outra tela
  *     estão ligados a este; 'falta' = texto do selo quando não há nenhum;
  *     'mostrar' = 'quantidade' ou 'sim'; 'declarado' = coluna com a quantidade esperada),
+ *     'acao_falta' = 'incluir' (atalho para cadastrar) ou 'corrigir' (tela Corrigir selo)
+ *   corrigir_vinculo (tela de correção do vínculo, com sugestões; ver corrigir_vinculo.php)
  *   pk, lista (colunas da listagem), busca (colunas da pesquisa),
  *   ordem (ORDER BY padrão), filtros (colunas aceitas como filtro via URL),
  *   secoes (agrupamento visual), relacionados (registros ligados), somente_leitura
@@ -140,6 +142,21 @@ return [
     'socio' => [
         'tabela' => 'cadastro_sociojuridico_import',
         'pasta_fotos' => 'socio_juridico', // ~/www/arquivos/socio_juridico
+        // Coluna "Domicílio" na listagem: o código do selo existe em Domicílios?
+        'indicadores' => [
+            ['id' => 'sem_domicilio', 'titulo' => 'Domicílio', 'falta' => 'Selo não encontrado',
+             'tela' => 'domicilios', 'coluna' => 'numero_selo', 'campo_local' => 'codigo_selo',
+             'mostrar' => 'sim', 'acao_falta' => 'corrigir'],
+        ],
+        // Tela "Corrigir selo": sugere domicílios parecidos com o selo gravado
+        'corrigir_vinculo' => [
+            'campo'   => 'codigo_selo',              // campo corrigido aqui
+            'rotulo'  => 'selo',
+            'tela'    => 'domicilios',               // onde o selo precisa existir
+            'cpf'     => ['r1_cpf' => 'cpf'],        // mesmo CPF => sugestão forte
+            'nome'    => ['r1_nome' => ['nome_principal_morador', 'nome_entrevistado']],
+            'exibir'  => ['r1_nome', 'r1_cpf', 'nome_cadastrador', 'data_registro'],
+        ],
         'titulo' => 'Sócio jurídicos',
         'ficha'  => 'Ficha de Cadastro Sociojurídico',
         'icone'  => 'fa-balance-scale',
@@ -224,6 +241,19 @@ return [
     'caracterizacao' => [
         'tabela' => 'caracterizacao_vulnerabilidade_import',
         'pasta_fotos' => 'caracterizacao', // ~/www/arquivos/caracterizacao
+        // Coluna "Domicílio" na listagem: o código do selo existe em Domicílios?
+        'indicadores' => [
+            ['id' => 'sem_domicilio', 'titulo' => 'Domicílio', 'falta' => 'Selo não encontrado',
+             'tela' => 'domicilios', 'coluna' => 'numero_selo', 'campo_local' => 'codigo_selo',
+             'mostrar' => 'sim', 'acao_falta' => 'corrigir'],
+        ],
+        // Tela "Corrigir selo" (sem CPF/nome nesta tabela: sugere só por selo parecido)
+        'corrigir_vinculo' => [
+            'campo'   => 'codigo_selo',
+            'rotulo'  => 'selo',
+            'tela'    => 'domicilios',
+            'exibir'  => ['responsavel_coleta', 'data_registro', 'quantidade_comodos'],
+        ],
         'titulo' => 'Caracterizações',
         'ficha'  => 'Ficha de Caracterização de Vulnerabilidade',
         'icone'  => 'fa-building',

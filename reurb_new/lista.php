@@ -54,17 +54,24 @@ $seloIndicador = function (array $ind, array $linha) use ($crud): string {
     $qtd   = (int) ($linha[$ind['alias']] ?? 0);
     $valor = $linha[$ind['campo_local']] ?? null;
     $tela  = $ind['tela'];
-    // Sem vínculo: selo vermelho (com atalho para cadastrar, se o perfil puder)
+    // Sem vínculo: selo vermelho + atalho (cadastrar o que falta, ou corrigir o vínculo errado)
     if ($qtd === 0) {
         $selo = '<span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> ' . e($ind['falta']) . '</span>';
-        if (pode($tela, 'incluir') && empty($GLOBALS['TABELAS'][$tela]['somente_leitura'])) {
+        if (($ind['acao_falta'] ?? 'incluir') === 'corrigir') {
+            if (!$crud->somenteLeitura && pode($crud->chave, 'alterar') && !empty($crud->cfg['corrigir_vinculo'])) {
+                $selo .= ' <a class="btn btn-outline-danger btn-xs reurb-btn-corrigir" title="Corrigir o ' . e($crud->cfg['corrigir_vinculo']['rotulo'] ?? 'vínculo') . '" href="'
+                       . e(url('corrigir_vinculo.php', ['t' => $crud->chave, 'id' => $linha[$crud->pk]])) . '"><i class="fas fa-wrench"></i> Corrigir</a>';
+            }
+        } elseif (pode($tela, 'incluir') && empty($GLOBALS['TABELAS'][$tela]['somente_leitura'])) {
             $selo .= ' <a class="small" title="Cadastrar agora" href="'
                    . e(url('form.php', ['t' => $tela, $ind['coluna'] => $valor])) . '"><i class="fas fa-plus-circle"></i></a>';
         }
         return $selo;
     }
-    // Com vínculo: link para os registros ligados
-    $href = url('lista.php', ['t' => $tela, $ind['coluna'] => $valor]);
+    // Com vínculo: abre a ficha (quando é um só, pela chave) ou a lista dos registros ligados
+    $href = $qtd === 1 && $ind['coluna'] === ($ind['pk_rel'] ?? null)
+        ? url('form.php', ['t' => $tela, 'id' => $valor])
+        : url('lista.php', ['t' => $tela, $ind['coluna'] => $valor]);
     if (($ind['mostrar'] ?? 'quantidade') === 'sim') {
         $selo = $qtd === 1
             ? '<span class="badge badge-success"><i class="fas fa-check"></i> Sim</span>'

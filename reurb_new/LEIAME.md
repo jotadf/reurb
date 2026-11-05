@@ -84,6 +84,27 @@ if (!pode_link_externo('importar_dados')) {   // mesma chave usada em menu_exter
 }
 ```
 
+## Corrigir selo
+
+Para cadastros sociojurídicos e caracterizações cujo código do selo não existe em
+Domicílios (quase sempre selo digitado errado no Kobo). Abre pelo botão "Corrigir" na
+listagem ou pelo aviso vermelho no topo da ficha (`corrigir_vinculo.php`).
+
+- Mostra o selo gravado e sugere os domicílios mais prováveis, com o motivo de cada um:
+  - mesmo selo escrito de outro jeito (espaço, traço, maiúscula ou zero a menos:
+    `" ds 0038 01"` e `DS-0038-1` → `DS-0038-01`);
+  - selo com 1 ou 2 caracteres diferentes (ex.: letra O no lugar de zero);
+  - mesmo CPF ou mesmo nome do titular (só no Sócio jurídico, que tem esses dados).
+- Cada sugestão informa se o domicílio já tem cadastro dessa tela ("Já tem 1"), para
+  evitar duplicidade. Também dá para digitar o selo, com lista de selos existentes.
+- Só aceita selo que exista em Domicílios. A correção fica na auditoria, e depois de
+  salvar volta para a listagem de onde veio.
+- Precisa da permissão "alterar" na tela (Administrador e Usuário). O Observador vê os
+  avisos, mas não o botão.
+- Na ficha, trocar o selo para um valor que não existe em Domicílios também é recusado.
+  Um selo errado que já estava gravado não impede salvar os outros campos.
+- Configuração: `'corrigir_vinculo'` em `config/tabelas.php`.
+
 ## Menu lateral
 
 O menu fica em `includes/menu.php`. A estrutura (grupos, itens, ordem, ícones e textos)
@@ -168,6 +189,8 @@ Chaves de `t`: `selagem`, `domicilios`, `socio`, `caracterizacao`, `perfil`, `eq
     quando não há nenhum; amarelo "1 de 2" quando há menos que o declarado no lote.
   - Domicílios: colunas "Sócio jurídico" e "Caracterização" com "Sim", vermelho "Falta"
     ou amarelo "2 cadastros" quando o mesmo selo tem mais de um cadastro.
+  - Sócio jurídico e Caracterização: coluna "Domicílio" com "Sim" ou vermelho
+    "Selo não encontrado" quando o código do selo não existe em Domicílios.
   - Botões no topo mostram quantos registros têm cada pendência e filtram a lista
     (funcionam junto com a pesquisa). Clicar no selo abre os registros ligados; o "+" ao
     lado de "Falta" abre o cadastro já com o vínculo preenchido (só para quem pode incluir).

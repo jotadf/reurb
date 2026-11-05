@@ -85,6 +85,10 @@
 .reurb-lista .pagination { margin-bottom: 0; }
 .reurb-lista .col-indicador { white-space: nowrap; text-align: center; width: 1%; }
 .reurb-lista .col-indicador .badge { font-size: .78rem; padding: .35em .6em; }
+.reurb-sugestoes td, .reurb-sugestoes th { vertical-align: middle; font-size: .88rem; }
+.reurb-sugestoes td:first-child, .reurb-sugestoes .btn { white-space: nowrap; }
+.btn-xs { padding: .1rem .4rem; font-size: .72rem; line-height: 1.4; border-radius: .25rem; }
+.reurb-btn-corrigir { vertical-align: baseline; }
 .reurb-pendencias { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
 
 .reurb-relacionados .table td, .reurb-relacionados .table th { font-size: .85rem; }

@@ -45,7 +45,9 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
         $html = $c['tipo'] === 'textarea' || ($c['base'] === 'textarea' && $c['tipo'] !== 'foto')
             ? '<textarea class="form-control" id="' . e($id) . '" rows="2" readonly>' . e($mostrar) . '</textarea>'
             : '<input type="text" class="form-control" id="' . e($id) . '" value="' . e($mostrar) . '" readonly>';
-        // Na edição, a chave segue no POST só como referência (o servidor não a altera)
+        if ($c['tipo'] === 'ref') {
+            $html .= ref_aviso($crud, $nome, $valorTexto);
+        }
         return envolver($c['col'], $label . $html . $feedback);
     }
 
@@ -127,6 +129,9 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
             if ($c['tipo'] === 'foto') {
                 $html .= foto_previa($id, $valorTexto === '' ? '' : $href, $c['label']);
             }
+            if ($c['tipo'] === 'ref' && !$erro) {
+                $html .= ref_aviso($crud, $nome, $valorTexto);
+            }
             break;
 
         default:
@@ -151,6 +156,17 @@ function campo_html(Crud $crud, string $nome, $valor, bool $novo, ?string $erro,
     }
 
     return envolver($c['col'], $label . $html . $feedback);
+}
+
+/** Aviso abaixo de um campo de vínculo cujo valor gravado não existe na outra tela. */
+function ref_aviso(Crud $crud, string $nome, string $valor): string
+{
+    if ($valor === '' || $crud->vinculoExiste($nome, $valor)) {
+        return '';
+    }
+    $ref = $crud->campos[$nome]['ref'];
+    return '<small class="form-text text-danger"><i class="fas fa-exclamation-circle"></i> Não existe em '
+         . e($GLOBALS['TABELAS'][$ref]['titulo'] ?? $ref) . '.</small>';
 }
 
 /**

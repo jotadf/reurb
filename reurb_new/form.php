@@ -105,6 +105,25 @@ require __DIR__ . '/includes/topo.php';
 
         <div class="card-body">
             <?php
+            // Vínculo quebrado (ex.: selo que não existe em Domicílios): aviso com atalho para corrigir
+            $cfgV = $crud->cfg['corrigir_vinculo'] ?? null;
+            if (!$novo && $cfgV && isset($crud->campos[$cfgV['campo']])
+                && ($valorV = (string) ($linha[$cfgV['campo']] ?? '')) !== ''
+                && !$crud->vinculoExiste($cfgV['campo'], $valorV)): ?>
+                <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap">
+                    <span>
+                        <i class="fas fa-exclamation-triangle"></i>
+                        O <?= e($cfgV['rotulo'] ?? 'vínculo') ?> <strong><?= e($valorV) ?></strong> não existe em
+                        <?= e($GLOBALS['TABELAS'][$cfgV['tela']]['titulo'] ?? $cfgV['tela']) ?>.
+                    </span>
+                    <?php if ($podeAlterar): ?>
+                        <a class="btn btn-danger btn-sm mt-1 mt-sm-0" href="<?= e(url('corrigir_vinculo.php', ['t' => $crud->chave, 'id' => $id])) ?>">
+                            <i class="fas fa-wrench"></i> Corrigir <?= e($cfgV['rotulo'] ?? 'vínculo') ?>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            <?php endif; ?>
+            <?php
             // Monta o HTML de cada seção e conta os erros de cada uma
             $secoesHtml  = [];
             $secoesErros = [];
