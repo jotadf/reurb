@@ -84,6 +84,42 @@ if (!pode_link_externo('importar_dados')) {   // mesma chave usada em menu_exter
 }
 ```
 
+## Menu lateral
+
+O menu fica em `includes/menu.php`. A estrutura (grupos, itens, ordem, ícones e textos)
+está no array `$MENU_LATERAL` no início do arquivo. As telas do CRUD o incluem pelo
+`includes/topo.php`, e qualquer outra página do sistema também pode incluí-lo:
+
+```php
+<?php
+// No início da página, antes de qualquer HTML (ajuste o caminho até a pasta do CRUD)
+require_once __DIR__ . '/reurb_crud/lib/bootstrap.php';
+exigir_login();
+$menuAtivo = 'importar_dados';   // item que fica destacado (opcional)
+?>
+...
+<div id="wrapper">
+    <?php require RAIZ . '/includes/menu.php'; ?>
+    <div id="content-wrapper" class="d-flex flex-column">
+        ... conteúdo da página ...
+    </div>
+</div>
+```
+
+- Os itens aparecem conforme o perfil de quem está logado (`config/permissoes.php`).
+- Os links saem com o caminho completo da pasta do CRUD (ex.: `/reurb_crud/lista.php?t=selagem`),
+  então funcionam a partir de qualquer pasta. Esse caminho é descoberto sozinho; se os links
+  ficarem errados (ex.: pasta publicada por `Alias` do Apache), informe-o em `crud_url` no
+  `config/config.php`.
+- Em `links_externos`, prefira caminhos a partir da raiz do site, ex.:
+  `'/reurb/importar.php'`. Caminhos relativos são lidos a partir da pasta do CRUD.
+- A página precisa carregar o CSS e o JS do SB Admin 2 (o botão de recolher o menu é do
+  `sb-admin-2.min.js`). Se preferir o layout completo do CRUD, inclua
+  `includes/topo.php` no início do conteúdo e `includes/rodape.php` no fim.
+- O `lib/bootstrap.php` declara funções com nomes curtos (`e()`, `url()`, `db()`, `cfg()`...).
+  Se a página do sistema atual já tiver funções com esses nomes, o PHP acusa
+  "Cannot redeclare". Nesse caso, me avise para renomearmos.
+
 ## Endereços
 
 - `lista.php?t=selagem` — listagem com pesquisa, ordenação por coluna e paginação

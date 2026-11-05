@@ -33,6 +33,11 @@ return [
     // ---------------------------------------------------------------
     'tema_base' => getenv('REURB_TEMA') ?: 'https://cdn.jsdelivr.net/npm/startbootstrap-sb-admin-2@4.1.4/',
 
+    // Endereço da pasta do CRUD no site, ex.: '/reurb_crud/'.
+    // Deixe '' para descobrir sozinho. Só preencha se os links do menu
+    // ficarem errados quando ele for incluído em páginas de outras pastas.
+    'crud_url' => '',
+
     // Prefixo usado para abrir as fotos (campos foto_*).
     // Se no banco estiver gravado só o nome do arquivo, informe a pasta, ex.: '/reurb/uploads/'
     // Se já estiver gravada a URL completa, deixe ''.

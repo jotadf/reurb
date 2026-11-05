@@ -102,7 +102,7 @@ function acesso_negado(string $mensagem): void
        . '<div class="error mx-auto" data-text="403">403</div>'
        . '<p class="lead text-gray-800 mb-3">Acesso negado</p>'
        . '<p class="text-gray-600 mb-4">' . e($mensagem) . '</p>'
-       . '<a href="index.php">&larr; Voltar para o início</a>'
+       . '<a href="' . e(crud_url('index.php')) . '">&larr; Voltar para o início</a>'
        . '</div>';
     require RAIZ . '/includes/rodape.php';
     exit;

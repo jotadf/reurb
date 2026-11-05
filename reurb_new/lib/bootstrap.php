@@ -85,6 +85,55 @@ function redirecionar(string $url): void
     exit;
 }
 
+/**
+ * Endereço de uma página/arquivo do CRUD a partir da raiz do site
+ * (ex.: 'lista.php?t=selagem' -> '/reurb_crud/lista.php?t=selagem').
+ * Assim o menu e o layout funcionam incluídos em páginas de qualquer pasta.
+ * Endereços completos (http://, /caminho, #) são mantidos como estão.
+ */
+function crud_url(string $caminho = ''): string
+{
+    if (preg_match('#^([a-z][a-z0-9+.\-]*:|//|/|\#)#i', $caminho)) {
+        return $caminho;
+    }
+    return crud_base_url() . $caminho;
+}
+
+/** Pasta do CRUD no site, com barra no fim (ex.: '/reurb_crud/'). */
+function crud_base_url(): string
+{
+    static $base = null;
+    if ($base !== null) {
+        return $base;
+    }
+    $configurado = (string) cfg('crud_url', '');
+    if ($configurado !== '') {
+        return $base = rtrim($configurado, '/') . '/';
+    }
+
+    $normalizar = function (string $p): string {
+        $p = rtrim(str_replace('\\', '/', $p), '/');
+        return PHP_OS_FAMILY === 'Windows' ? strtolower($p) : $p;
+    };
+    $raiz = realpath(RAIZ);
+
+    // 1) Pasta do CRUD dentro da raiz do site (DOCUMENT_ROOT)
+    $doc = realpath((string) ($_SERVER['DOCUMENT_ROOT'] ?? ''));
+    if ($doc && $raiz && str_starts_with($normalizar($raiz) . '/', $normalizar($doc) . '/')) {
+        $rel = substr(str_replace('\\', '/', $raiz), strlen(rtrim(str_replace('\\', '/', $doc), '/')));
+        return $base = rtrim($rel, '/') . '/';
+    }
+
+    // 2) Página atual está na própria pasta do CRUD (ex.: pasta publicada por Alias)
+    $script = realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? ''));
+    if ($script && $raiz && $normalizar(dirname($script)) === $normalizar($raiz)) {
+        return $base = rtrim(str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/'))), '/') . '/';
+    }
+
+    // 3) Sem como descobrir: links relativos (funcionam dentro da pasta do CRUD)
+    return $base = '';
+}
+
 function url(string $pagina, array $params = []): string
 {
     $params = array_filter($params, fn($v) => $v !== null && $v !== '');
@@ -182,7 +231,7 @@ function encerrar_sessao(): void
 function exigir_login(): void
 {
     if (usuario_id() === null) {
-        redirecionar(cfg('pagina_login', 'login.php'));
+        redirecionar(crud_url(cfg('pagina_login', 'login.php')));
     }
     // Usuário excluído ou inativado depois de entrar: encerra a sessão
     $u = usuario_atual();
@@ -190,6 +239,6 @@ function exigir_login(): void
         $_SESSION = [];
         session_regenerate_id(true);
         flash('warning', 'Seu acesso foi desativado. Procure um administrador.');
-        redirecionar(cfg('pagina_login', 'login.php'));
+        redirecionar(crud_url(cfg('pagina_login', 'login.php')));
     }
 }

@@ -1,4 +1,4 @@
-<?php $tema = rtrim((string) cfg('tema_base'), '/') . '/'; ?>
+<?php $tema = crud_url(rtrim((string) cfg('tema_base'), '/') . '/'); ?>
             </div><!-- /.container-fluid -->
         </div><!-- /#content -->
 
@@ -13,7 +13,7 @@
 <!-- Confirmação de exclusão (usada na listagem e na ficha) -->
 <div class="modal fade" id="modalExcluir" tabindex="-1" role="dialog" aria-labelledby="modalExcluirTitulo" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <form class="modal-content" method="post" action="excluir.php">
+        <form class="modal-content" method="post" action="<?= e(crud_url('excluir.php')) ?>">
             <?= csrf_campo() ?>
             <input type="hidden" name="t" value="">
             <input type="hidden" name="id" value="">
@@ -39,6 +39,6 @@
 <script src="<?= e($tema) ?>vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script src="<?= e($tema) ?>vendor/jquery-easing/jquery.easing.min.js"></script>
 <script src="<?= e($tema) ?>js/sb-admin-2.min.js"></script>
-<script src="assets/js/reurb-crud.js"></script>
+<script src="<?= e(crud_url('assets/js/reurb-crud.js')) ?>"></script>
 </body>
 </html>

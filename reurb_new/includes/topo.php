@@ -3,30 +3,14 @@
  * Cabeçalho + menu lateral + barra superior (tema SB Admin 2).
  * Antes de incluir, defina:
  *   $tituloPagina  (string)  título da aba do navegador
- *   $menuAtivo     (string)  chave da tela ativa (ex.: 'selagem')
+ *   $menuAtivo     (string)  chave do item ativo no menu (ex.: 'selagem')
+ *
+ * O menu lateral fica em includes/menu.php.
+ * Este arquivo e o rodape.php também podem ser usados por páginas de fora da
+ * pasta do CRUD (os endereços saem completos via crud_url()).
  */
-$tema       = rtrim((string) cfg('tema_base'), '/') . '/';
-$menuAtivo  = $menuAtivo ?? '';
-$links      = cfg('links_externos', []);
-$T          = $GLOBALS['TABELAS'];
-
-/** Item do menu apontando para uma tela de CRUD */
-$itemCrud = function (string $chave, ?string $texto = null) use ($menuAtivo, $T): string {
-    if (!isset($T[$chave]) || !pode($chave, 'ver')) {
-        return '';
-    }
-    $ativo = $menuAtivo === $chave ? ' active' : '';
-    return '<li class="nav-item' . $ativo . '"><a class="nav-link" href="' . e(url('lista.php', ['t' => $chave])) . '">'
-         . '<i class="fas fa-fw ' . e($T[$chave]['icone'] ?? 'fa-table') . '"></i> <span>' . e($texto ?? $T[$chave]['titulo']) . '</span></a></li>';
-};
-/** Item do menu apontando para uma tela já existente no sistema */
-$itemLink = function (string $chaveLink, string $icone, string $texto) use ($links): string {
-    if (!pode_link_externo($chaveLink)) {
-        return '';
-    }
-    return '<li class="nav-item"><a class="nav-link" href="' . e($links[$chaveLink] ?? '#') . '">'
-         . '<i class="fas fa-fw ' . e($icone) . '"></i> <span>' . e($texto) . '</span></a></li>';
-};
+$tema      = crud_url(rtrim((string) cfg('tema_base'), '/') . '/');
+$menuAtivo = $menuAtivo ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -39,53 +23,12 @@ $itemLink = function (string $chaveLink, string $icone, string $texto) use ($lin
     <link href="<?= e($tema) ?>vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Nunito:300,400,600,700,800,900" rel="stylesheet">
     <link href="<?= e($tema) ?>css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="assets/css/reurb-crud.css" rel="stylesheet">
+    <link href="<?= e(crud_url('assets/css/reurb-crud.css')) ?>" rel="stylesheet">
 </head>
 <body id="page-top">
 <div id="wrapper">
 
-    <!-- ===================== Menu lateral ===================== -->
-    <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-
-        <a class="sidebar-brand d-flex align-items-center justify-content-center" href="index.php">
-            <div class="sidebar-brand-icon"><i class="fas fa-desktop"></i></div>
-            <div class="sidebar-brand-text mx-2"><?= e(cfg('app_nome')) ?></div>
-        </a>
-
-        <hr class="sidebar-divider my-0">
-
-        <?php
-        // Cada grupo do menu só aparece se o perfil tiver pelo menos um item nele
-        $grupos = [
-            'Gestão de Acesso'     => $itemCrud('perfil') . $itemCrud('equipe') . $itemCrud('usuario') . $itemCrud('auditoria'),
-            'Importação da Coleta' => $itemLink('importar_dados', 'fa-id-card', 'Importar Dados')
-                                    . $itemLink('gerenciar_imagens', 'fa-file-image', 'Gerenciar Imagens'),
-            'Edição de Dados'      => $itemCrud('selagem') . $itemCrud('domicilios') . $itemCrud('socio') . $itemCrud('caracterizacao'),
-            'Relatório'            => $itemLink('gerar_relatorio', 'fa-file-excel', 'Gerar Relatório')
-                                    . $itemLink('selagens_sem_socio', 'fa-file-excel', 'Listagem de Selagens Sem Sócio Jurídico')
-                                    . $itemLink('caract_sem_selagem', 'fa-file-excel', 'Listagem de Caracterizações Sem Selagem'),
-        ];
-        // Para quem só visualiza, o grupo de dados não é de "edição"
-        if (!pode('selagem', 'alterar') && !pode('domicilios', 'alterar') && !pode('socio', 'alterar') && !pode('caracterizacao', 'alterar')) {
-            $grupos = array_combine(
-                array_map(fn($g) => $g === 'Edição de Dados' ? 'Dados da Coleta' : $g, array_keys($grupos)),
-                array_values($grupos)
-            );
-        }
-        foreach ($grupos as $tituloGrupo => $itens):
-            if ($itens === '') {
-                continue;
-            } ?>
-            <hr class="sidebar-divider">
-            <div class="sidebar-heading"><?= e($tituloGrupo) ?></div>
-            <?= $itens ?>
-        <?php endforeach; ?>
-
-        <hr class="sidebar-divider d-none d-md-block">
-        <div class="text-center d-none d-md-inline">
-            <button class="rounded-circle border-0" id="sidebarToggle" type="button" aria-label="Recolher menu"></button>
-        </div>
-    </ul>
+    <?php require __DIR__ . '/menu.php'; ?>
 
     <!-- ===================== Conteúdo ===================== -->
     <div id="content-wrapper" class="d-flex flex-column">
@@ -108,7 +51,7 @@ $itemLink = function (string $chaveLink, string $icone, string $texto) use ($lin
                                 <i class="fas fa-user-shield fa-sm fa-fw mr-2 text-gray-400"></i>Perfil: <strong><?= e(perfil_nome() ?: '—') ?></strong>
                             </span>
                             <div class="dropdown-divider"></div>
-                            <a class="dropdown-item" href="logout.php">
+                            <a class="dropdown-item" href="<?= e(crud_url('logout.php')) ?>">
                                 <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i> Sair
                             </a>
                         </div>
