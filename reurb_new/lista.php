@@ -28,8 +28,15 @@ foreach ($crud->filtrosPermitidos() as $f) {
     }
 }
 
+// Indicadores de vínculo (ex.: selagem sem domicílio) e filtro de pendência
+$indicadores = $crud->indicadores();
+$pendencia   = isset($_GET['pend']) && is_string($_GET['pend'])
+            && ($_GET['pend'] === 'qualquer' || isset($indicadores[$_GET['pend']])) ? $_GET['pend'] : '';
+$pendencias  = [];
+
 try {
-    [$linhas, $total] = $crud->listar($busca, $filtros, $ordem, $dir, $pagina, $porPag);
+    [$linhas, $total] = $crud->listar($busca, $filtros, $ordem, $dir, $pagina, $porPag, $pendencia);
+    $pendencias = $crud->contarPendencias($busca, $filtros);
 } catch (Throwable $e) {
     error_log($e->getMessage());
     $linhas = [];
@@ -40,7 +47,36 @@ $paginas  = max(1, (int) ceil($total / $porPag));
 $colunas  = $crud->colunasLista();
 
 // Parâmetros atuais (para montar links mantendo pesquisa/filtros)
-$base = array_merge(['t' => $crud->chave, 'q' => $busca, 'o' => $ordem, 'd' => $ordem ? $dir : null], $filtros);
+$base = array_merge(['t' => $crud->chave, 'q' => $busca, 'o' => $ordem, 'd' => $ordem ? $dir : null, 'pend' => $pendencia], $filtros);
+
+/** Selo da coluna de situação de um indicador */
+$seloIndicador = function (array $ind, array $linha) use ($crud): string {
+    $qtd   = (int) ($linha[$ind['alias']] ?? 0);
+    $valor = $linha[$ind['campo_local']] ?? null;
+    $tela  = $ind['tela'];
+    // Sem vínculo: selo vermelho (com atalho para cadastrar, se o perfil puder)
+    if ($qtd === 0) {
+        $selo = '<span class="badge badge-danger"><i class="fas fa-exclamation-circle"></i> ' . e($ind['falta']) . '</span>';
+        if (pode($tela, 'incluir') && empty($GLOBALS['TABELAS'][$tela]['somente_leitura'])) {
+            $selo .= ' <a class="small" title="Cadastrar agora" href="'
+                   . e(url('form.php', ['t' => $tela, $ind['coluna'] => $valor])) . '"><i class="fas fa-plus-circle"></i></a>';
+        }
+        return $selo;
+    }
+    // Com vínculo: link para os registros ligados
+    $href = url('lista.php', ['t' => $tela, $ind['coluna'] => $valor]);
+    if (($ind['mostrar'] ?? 'quantidade') === 'sim') {
+        $selo = $qtd === 1
+            ? '<span class="badge badge-success"><i class="fas fa-check"></i> Sim</span>'
+            : '<span class="badge badge-warning" title="Mais de um cadastro para o mesmo registro">' . $qtd . ' cadastros</span>';
+    } else {
+        $declarado = $ind['declarado'] !== null ? (int) ($linha[$ind['declarado']] ?? 0) : 0;
+        $selo = $declarado > $qtd
+            ? '<span class="badge badge-warning" title="Cadastrados / declarados no lote">' . $qtd . ' de ' . $declarado . '</span>'
+            : '<span class="badge badge-success">' . $qtd . '</span>';
+    }
+    return pode($tela, 'ver') ? '<a href="' . e($href) . '" class="text-decoration-none">' . $selo . '</a>' : $selo;
+};
 
 $tituloPagina = $crud->cfg['titulo'];
 $menuAtivo    = $crud->chave;
@@ -60,6 +96,7 @@ require __DIR__ . '/includes/topo.php';
     <div class="card-body">
         <form method="get" class="form-row align-items-center mb-3" role="search">
             <input type="hidden" name="t" value="<?= e($crud->chave) ?>">
+            <?php if ($pendencia !== ''): ?><input type="hidden" name="pend" value="<?= e($pendencia) ?>"><?php endif; ?>
             <?php foreach ($filtros as $f => $v): ?>
                 <input type="hidden" name="<?= e($f) ?>" value="<?= e($v) ?>">
             <?php endforeach; ?>
@@ -75,7 +112,7 @@ require __DIR__ . '/includes/topo.php';
             </div>
             <div class="col mb-2 text-md-right small text-gray-600">
                 <?= number_format($total, 0, ',', '.') ?> registro(s)
-                <?php if ($busca !== '' || $filtros): ?>
+                <?php if ($busca !== '' || $filtros || $pendencia !== ''): ?>
                     &middot; <a href="<?= e(url('lista.php', ['t' => $crud->chave])) ?>">limpar pesquisa</a>
                 <?php endif; ?>
             </div>
@@ -91,11 +128,28 @@ require __DIR__ . '/includes/topo.php';
             </div>
         <?php endif; ?>
 
+        <?php if ($pendencias):
+            $rotulos = array_map(fn($i) => $i['falta'] === 'Falta' ? 'Sem ' . mb_strtolower($i['titulo']) : $i['falta'], $indicadores);
+            $rotulos['qualquer'] = 'Com alguma pendência';
+            ?>
+            <div class="reurb-pendencias mb-3" role="group" aria-label="Filtrar por pendência">
+                <span class="small text-gray-600 mr-1">Pendências:</span>
+                <a href="<?= e(url('lista.php', array_merge($base, ['pend' => null, 'p' => null]))) ?>"
+                   class="btn btn-sm <?= $pendencia === '' ? 'btn-primary' : 'btn-outline-primary' ?>">Todos</a>
+                <?php foreach ($pendencias as $id => $qtd): ?>
+                    <a href="<?= e(url('lista.php', array_merge($base, ['pend' => $id, 'p' => null]))) ?>"
+                       class="btn btn-sm <?= $pendencia === $id ? 'btn-danger' : 'btn-outline-danger' ?>">
+                        <?= e($rotulos[$id]) ?> <span class="badge <?= $pendencia === $id ? 'badge-light' : 'badge-danger' ?>"><?= number_format($qtd, 0, ',', '.') ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
         <div class="table-responsive">
             <table class="table table-bordered table-hover table-sm mb-3">
                 <thead class="thead-light">
                 <tr>
-                    <?php foreach ($colunas as $c):
+                    <?php foreach ($colunas as $n => $c):
                         $ativa   = $ordem === $c;
                         $novaDir = $ativa && $dir === 'asc' ? 'desc' : 'asc';
                         ?>
@@ -105,21 +159,31 @@ require __DIR__ . '/includes/topo.php';
                                 <?php if ($ativa): ?><i class="fas fa-sort-<?= $dir === 'asc' ? 'up' : 'down' ?> fa-sm"></i><?php endif; ?>
                             </a>
                         </th>
+                        <?php if ($n === 0): // situação logo após a 1ª coluna, sempre à vista ?>
+                            <?php foreach ($indicadores as $ind): ?>
+                                <th scope="col" class="col-indicador"><?= e($ind['titulo']) ?></th>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
                     <?php endforeach; ?>
                     <th scope="col" class="col-acoes">Ações</th>
                 </tr>
                 </thead>
                 <tbody>
                 <?php if (!$linhas): ?>
-                    <tr><td colspan="<?= count($colunas) + 1 ?>" class="text-center text-gray-500 py-4">Nenhum registro encontrado.</td></tr>
+                    <tr><td colspan="<?= count($colunas) + count($indicadores) + 1 ?>" class="text-center text-gray-500 py-4">Nenhum registro encontrado.</td></tr>
                 <?php endif; ?>
                 <?php foreach ($linhas as $l):
                     $id   = $l[$crud->pk];
                     $link = url('form.php', ['t' => $crud->chave, 'id' => $id]);
                     ?>
                     <tr>
-                        <?php foreach ($colunas as $c): ?>
+                        <?php foreach ($colunas as $n => $c): ?>
                             <td><?php if ($c === $crud->pk): ?><a href="<?= e($link) ?>"><?= e($crud->exibir($c, $l[$c])) ?></a><?php else: ?><?= e($crud->exibir($c, $l[$c])) ?><?php endif; ?></td>
+                            <?php if ($n === 0): ?>
+                                <?php foreach ($indicadores as $ind): ?>
+                                    <td class="col-indicador"><?= $seloIndicador($ind, $l) ?></td>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
                         <?php endforeach; ?>
                         <td class="col-acoes">
                             <a href="<?= e($link) ?>" class="btn btn-primary btn-sm" title="<?= $podeAlterar ? 'Editar' : 'Ver' ?>">

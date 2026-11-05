@@ -255,18 +255,56 @@ class Crud
         return array_values(array_filter($this->cfg['filtros'] ?? [], fn($c) => isset($this->campos[$c])));
     }
 
+    /** Coluna da tabela principal da listagem (alias t). */
+    private static function qt(string $coluna): string
+    {
+        return 't.' . self::q($coluna);
+    }
+
     /**
-     * @return array{0: array, 1: int} [linhas, total]
+     * Indicadores de registros vinculados (config 'indicadores'), já validados contra o banco.
+     * Ex.: selagem sem domicílio; domicílio sem cadastro sociojurídico.
      */
-    public function listar(string $busca = '', array $filtros = [], ?string $ordem = null, string $dir = 'asc',
-                           int $pagina = 1, int $porPagina = 25): array
+    public function indicadores(): array
+    {
+        $saida = [];
+        foreach ($this->cfg['indicadores'] ?? [] as $ind) {
+            $tela = $ind['tela'] ?? '';
+            if (!isset($GLOBALS['TABELAS'][$tela]) || !isset($this->campos[$ind['campo_local'] ?? ''])) {
+                continue;
+            }
+            $outro = new Crud($tela, $GLOBALS['TABELAS'][$tela]);
+            if (!isset($outro->campos[$ind['coluna'] ?? ''])) {
+                continue;
+            }
+            $ind['tabela_rel'] = $outro->tabela;
+            $ind['alias']      = '__ind_' . preg_replace('/\W/', '', $ind['id']);
+            $ind['declarado']  = isset($ind['declarado'], $this->campos[$ind['declarado']]) ? $ind['declarado'] : null;
+            $saida[$ind['id']] = $ind;
+        }
+        return $saida;
+    }
+
+    /** SQL "não existe registro vinculado" para um indicador. */
+    private function sqlSemVinculo(array $ind): string
+    {
+        return 'NOT EXISTS (SELECT 1 FROM ' . self::q($ind['tabela_rel']) . ' r WHERE r.' . self::q($ind['coluna'])
+             . ' = ' . self::qt($ind['campo_local']) . ')';
+    }
+
+    /**
+     * Condições de pesquisa, filtros e pendência.
+     * $pendencia: id de um indicador, 'qualquer' (falta algum) ou '' (sem filtro).
+     * @return array{0: string, 1: array} [sql do WHERE, parâmetros]
+     */
+    private function montarWhere(string $busca, array $filtros, string $pendencia = ''): array
     {
         $where  = [];
         $params = [];
 
         foreach ($filtros as $campo => $valor) {
             if (in_array($campo, $this->filtrosPermitidos(), true) && $valor !== '' && $valor !== null) {
-                $where[]  = self::q($campo) . ' = ?';
+                $where[]  = self::qt($campo) . ' = ?';
                 $params[] = $valor;
             }
         }
@@ -276,7 +314,7 @@ class Crud
             $ors = [];
             foreach ($this->cfg['busca'] ?? [$this->pk] as $campo) {
                 if (isset($this->campos[$campo])) {
-                    $ors[]    = 'CAST(' . self::q($campo) . ' AS CHAR) LIKE ?';
+                    $ors[]    = 'CAST(' . self::qt($campo) . ' AS CHAR) LIKE ?';
                     $params[] = '%' . $busca . '%';
                 }
             }
@@ -285,9 +323,49 @@ class Crud
             }
         }
 
-        $sqlWhere = $where ? ' WHERE ' . implode(' AND ', $where) : '';
+        $indicadores = $this->indicadores();
+        if ($pendencia === 'qualquer' && $indicadores) {
+            $where[] = '(' . implode(' OR ', array_map([$this, 'sqlSemVinculo'], $indicadores)) . ')';
+        } elseif ($pendencia !== '' && isset($indicadores[$pendencia])) {
+            $where[] = $this->sqlSemVinculo($indicadores[$pendencia]);
+        }
 
-        $st = db()->prepare('SELECT COUNT(*) FROM ' . self::q($this->tabela) . $sqlWhere);
+        return [$where ? ' WHERE ' . implode(' AND ', $where) : '', $params];
+    }
+
+    /**
+     * Quantos registros (dentro da pesquisa/filtros atuais) estão sem cada vínculo.
+     * @return array<string,int> [id do indicador => total, 'qualquer' => total]
+     */
+    public function contarPendencias(string $busca = '', array $filtros = []): array
+    {
+        $indicadores = $this->indicadores();
+        if (!$indicadores) {
+            return [];
+        }
+        $saida = [];
+        $ids = array_keys($indicadores);
+        if (count($ids) > 1) {
+            $ids[] = 'qualquer';
+        }
+        foreach ($ids as $id) {
+            [$sqlWhere, $params] = $this->montarWhere($busca, $filtros, $id);
+            $st = db()->prepare('SELECT COUNT(*) FROM ' . self::q($this->tabela) . ' t' . $sqlWhere);
+            $st->execute($params);
+            $saida[$id] = (int) $st->fetchColumn();
+        }
+        return $saida;
+    }
+
+    /**
+     * @return array{0: array, 1: int} [linhas, total]
+     */
+    public function listar(string $busca = '', array $filtros = [], ?string $ordem = null, string $dir = 'asc',
+                           int $pagina = 1, int $porPagina = 25, string $pendencia = ''): array
+    {
+        [$sqlWhere, $params] = $this->montarWhere($busca, $filtros, $pendencia);
+
+        $st = db()->prepare('SELECT COUNT(*) FROM ' . self::q($this->tabela) . ' t' . $sqlWhere);
         $st->execute($params);
         $total = (int) $st->fetchColumn();
 
@@ -300,13 +378,21 @@ class Crud
         }
         $dir = strtolower($dir) === 'desc' ? 'DESC' : 'ASC';
 
-        $colunas   = array_map([self::class, 'q'], $this->colunasLista());
+        $colunas = array_map([self::class, 'qt'], $this->colunasLista());
+        // Quantidade de registros vinculados de cada indicador (e o valor declarado, se houver)
+        foreach ($this->indicadores() as $ind) {
+            $colunas[] = '(SELECT COUNT(*) FROM ' . self::q($ind['tabela_rel']) . ' r WHERE r.' . self::q($ind['coluna'])
+                       . ' = ' . self::qt($ind['campo_local']) . ') AS ' . self::q($ind['alias']);
+            if ($ind['declarado'] !== null && !in_array($ind['declarado'], $this->colunasLista(), true)) {
+                $colunas[] = self::qt($ind['declarado']);
+            }
+        }
         $porPagina = max(1, $porPagina);
         $offset    = (max(1, $pagina) - 1) * $porPagina;
 
-        $sql = 'SELECT ' . implode(', ', $colunas) . ' FROM ' . self::q($this->tabela) . $sqlWhere
-             . ' ORDER BY ' . self::q($ordem) . " $dir"
-             . ($ordem !== $this->pk ? ', ' . self::q($this->pk) . " $dir" : '')
+        $sql = 'SELECT ' . implode(', ', array_unique($colunas)) . ' FROM ' . self::q($this->tabela) . ' t' . $sqlWhere
+             . ' ORDER BY ' . self::qt($ordem) . " $dir"
+             . ($ordem !== $this->pk ? ', ' . self::qt($this->pk) . " $dir" : '')
              . " LIMIT $porPagina OFFSET $offset";
         $st = db()->prepare($sql);
         $st->execute($params);

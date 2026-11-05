@@ -83,6 +83,9 @@
 .reurb-lista .table td { vertical-align: middle; font-size: .9rem; }
 .reurb-lista .col-acoes { width: 1%; white-space: nowrap; text-align: center; }
 .reurb-lista .pagination { margin-bottom: 0; }
+.reurb-lista .col-indicador { white-space: nowrap; text-align: center; width: 1%; }
+.reurb-lista .col-indicador .badge { font-size: .78rem; padding: .35em .6em; }
+.reurb-pendencias { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
 
 .reurb-relacionados .table td, .reurb-relacionados .table th { font-size: .85rem; }
 .reurb-relacionados .table td:first-child, .reurb-relacionados .table th:first-child { padding-left: 1.25rem; }

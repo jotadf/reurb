@@ -163,6 +163,14 @@ Chaves de `t`: `selagem`, `domicilios`, `socio`, `caracterizacao`, `perfil`, `eq
   têm botão que abre a ficha ligada.
 - A ficha do lote lista os domicílios dele; a ficha do domicílio lista o cadastro
   sociojurídico e a caracterização (ligados por `codigo_selo` = `numero_selo`).
+- Pendências na listagem (`'indicadores'` em `config/tabelas.php`):
+  - Selagens: coluna "Domicílios" com a quantidade cadastrada; vermelho "Sem domicílio"
+    quando não há nenhum; amarelo "1 de 2" quando há menos que o declarado no lote.
+  - Domicílios: colunas "Sócio jurídico" e "Caracterização" com "Sim", vermelho "Falta"
+    ou amarelo "2 cadastros" quando o mesmo selo tem mais de um cadastro.
+  - Botões no topo mostram quantos registros têm cada pendência e filtram a lista
+    (funcionam junto com a pesquisa). Clicar no selo abre os registros ligados; o "+" ao
+    lado de "Falta" abre o cadastro já com o vínculo preenchido (só para quem pode incluir).
 - Auditoria: toda inclusão, alteração e exclusão grava `tabela`, `acao`
   (INSERT/UPDATE/DELETE), `usuario`, `valor_antigo`, `valor_atual` (JSON) e `atualizado`.
   Na alteração entram só os campos que mudaram; salvar sem mudar nada não gera registro.
@@ -177,5 +185,12 @@ Chaves de `t`: `selagem`, `domicilios`, `socio`, `caracterizacao`, `perfil`, `eq
   importado que não esteja na lista continua aparecendo e é preservado.
 - **Campos Sim/Não** gravam `sim`/`nao` (padrão do Kobo). Se o banco já tiver
   "Sim"/"SIM", o valor é reconhecido e mantido como está.
-- Para a auditoria ficar rápida com muitos registros, crie um índice:
-  `CREATE INDEX ix_auditoria_tabela ON auditoria (tabela, atualizado);`
+- **Índices recomendados** (o script do banco não cria). Sem eles, as colunas de pendência
+  e a auditoria ficam lentas quando houver milhares de registros:
+
+  ```sql
+  CREATE INDEX idx_domicilio_pai  ON domicilios_import (id_submissao_pai);
+  CREATE INDEX idx_socio_selo     ON cadastro_sociojuridico_import (codigo_selo);
+  CREATE INDEX idx_caract_selo    ON caracterizacao_vulnerabilidade_import (codigo_selo);
+  CREATE INDEX ix_auditoria_tabela ON auditoria (tabela, atualizado);
+  ```

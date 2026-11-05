@@ -22,6 +22,9 @@
  * Chaves da tela:
  *   tabela, titulo (menu/lista), ficha (título do formulário), icone (Font Awesome 5),
  *   pasta_fotos (subpasta das fotos dentro de 'fotos_base_url'),
+ *   indicadores (colunas de situação na listagem: quantos registros de outra tela
+ *     estão ligados a este; 'falta' = texto do selo quando não há nenhum;
+ *     'mostrar' = 'quantidade' ou 'sim'; 'declarado' = coluna com a quantidade esperada),
  *   pk, lista (colunas da listagem), busca (colunas da pesquisa),
  *   ordem (ORDER BY padrão), filtros (colunas aceitas como filtro via URL),
  *   secoes (agrupamento visual), relacionados (registros ligados), somente_leitura
@@ -38,6 +41,12 @@ return [
     'selagem' => [
         'tabela' => 'selagem_lotes_import',
         'pasta_fotos' => 'domicilio',    // mesmo formulário do Kobo que os domicílios: ~/www/arquivos/domicilio
+        // Colunas de situação na listagem + filtro de pendências
+        'indicadores' => [
+            ['id' => 'sem_domicilio', 'titulo' => 'Domicílios', 'falta' => 'Sem domicílio',
+             'tela' => 'domicilios', 'coluna' => 'id_submissao_pai', 'campo_local' => 'id_submissao',
+             'mostrar' => 'quantidade', 'declarado' => 'qtd_domicilios_lote'],
+        ],
         'titulo' => 'Selagens',
         'ficha'  => 'Ficha de Selagem de Lote',
         'icone'  => 'fa-id-card',
@@ -73,6 +82,13 @@ return [
     'domicilios' => [
         'tabela' => 'domicilios_import',
         'pasta_fotos' => 'domicilio',    // ~/www/arquivos/domicilio
+        // Colunas de situação na listagem + filtro de pendências
+        'indicadores' => [
+            ['id' => 'sem_socio', 'titulo' => 'Sócio jurídico', 'falta' => 'Falta',
+             'tela' => 'socio', 'coluna' => 'codigo_selo', 'campo_local' => 'numero_selo', 'mostrar' => 'sim'],
+            ['id' => 'sem_caracterizacao', 'titulo' => 'Caracterização', 'falta' => 'Falta',
+             'tela' => 'caracterizacao', 'coluna' => 'codigo_selo', 'campo_local' => 'numero_selo', 'mostrar' => 'sim'],
+        ],
         'titulo' => 'Domicílios',
         'ficha'  => 'Ficha de Domicílio',
         'icone'  => 'fa-home',
