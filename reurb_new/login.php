@@ -4,41 +4,59 @@
  * Se o seu sistema já tem login, não use este arquivo: basta ajustar
  * 'sessao_id_usuario' e 'sessao_nome_usuario' em config/config.php.
  *
- * Senhas: aceita hash do password_hash(). Se a senha antiga estiver em MD5,
- * o login funciona e a senha é convertida para password_hash automaticamente.
+ * Senhas: aceita password_hash, md5, sha1, sha256, sha512 ou texto puro
+ * (ver lib/senha.php). Se o login falhar, ligue 'login_diagnostico' na
+ * configuração para ver o motivo.
  */
 require __DIR__ . '/lib/bootstrap.php';
 
 $erro = '';
+$motivo = '';   // detalhe técnico, só exibido com 'login_diagnostico' = true
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_validar();
     $login = trim((string) ($_POST['login'] ?? ''));
     $senha = (string) ($_POST['senha'] ?? '');
     $cpf   = preg_replace('/\D/', '', $login);
 
-    $st = db()->prepare('SELECT id, nome, senha, ativo FROM usuario
-                          WHERE email = ? OR (? <> \'\' AND REPLACE(REPLACE(REPLACE(cpf, \'.\', \'\'), \'-\', \'\'), \' \', \'\') = ?)
-                          LIMIT 1');
-    $st->execute([$login, $cpf, $cpf]);
-    $u = $st->fetch();
+    try {
+        $st = db()->prepare('SELECT id, nome, senha, ativo FROM usuario
+                              WHERE email = ? OR (? <> \'\' AND REPLACE(REPLACE(REPLACE(cpf, \'.\', \'\'), \'-\', \'\'), \' \', \'\') = ?)
+                              LIMIT 1');
+        $st->execute([$login, $cpf, $cpf]);
+        $u = $st->fetch();
 
-    $ok = false;
-    if ($u && (int) $u['ativo'] === 1) {
-        $hash = (string) $u['senha'];
-        if (password_verify($senha, $hash)) {
-            $ok = true;
-        } elseif (preg_match('/^[a-f0-9]{32}$/i', $hash) && hash_equals(strtolower($hash), md5($senha))) {
-            $ok = true;   // senha legada em MD5: converte
-            db()->prepare('UPDATE usuario SET senha = ? WHERE id = ?')->execute([password_hash($senha, PASSWORD_DEFAULT), $u['id']]);
+        if (!$u) {
+            $motivo = 'Nenhum usuário encontrado com esse e-mail ou CPF.';
+        } elseif ((string) $u['ativo'] !== '1') {
+            $motivo = 'Usuário encontrado (id ' . $u['id'] . '), mas está inativo (ativo = ' . var_export($u['ativo'], true) . ').';
+        } elseif (!senha_confere($senha, (string) $u['senha'])) {
+            $gravado = trim((string) $u['senha']);
+            $formatoCfg = (string) cfg('senha_formato', 'auto');
+            $motivo = 'Usuário encontrado (id ' . $u['id'] . '), mas a senha não confere. '
+                    . ($formatoCfg === 'auto'
+                        ? 'Formato reconhecido no banco: ' . senha_detectar_formato($gravado)
+                        : 'Formato configurado: ' . $formatoCfg)
+                    . ' (senha gravada com ' . strlen((string) $u['senha']) . ' caracteres). '
+                    . 'Se o sistema atual usa outra regra (ex.: senha com "sal"), me informe qual.';
+        } else {
+            // Login correto
+            if (cfg('converter_senha_no_login', false)) {
+                $gravado = (string) $u['senha'];
+                if (senha_detectar_formato($gravado) !== 'password_hash' || password_needs_rehash($gravado, PASSWORD_DEFAULT)) {
+                    db()->prepare('UPDATE usuario SET senha = ? WHERE id = ?')
+                        ->execute([password_hash($senha, PASSWORD_DEFAULT), $u['id']]);
+                }
+            }
+            session_regenerate_id(true);
+            $_SESSION[cfg('sessao_id_usuario')]   = (int) $u['id'];
+            $_SESSION[cfg('sessao_nome_usuario')] = $u['nome'];
+            redirecionar('index.php');
         }
+    } catch (PDOException $e) {
+        $motivo = 'Erro ao consultar o banco: ' . $e->getMessage();
     }
 
-    if ($ok) {
-        session_regenerate_id(true);
-        $_SESSION[cfg('sessao_id_usuario')]   = (int) $u['id'];
-        $_SESSION[cfg('sessao_nome_usuario')] = $u['nome'];
-        redirecionar('index.php');
-    }
+    error_log('[REURB login] ' . $login . ': ' . $motivo);
     $erro = 'Usuário ou senha inválidos.';
 }
 $tema = rtrim((string) cfg('tema_base'), '/') . '/';
@@ -64,6 +82,9 @@ $tema = rtrim((string) cfg('tema_base'), '/') . '/';
                         <h1 class="h4 text-gray-900 mt-2"><?= e(cfg('app_nome')) ?></h1>
                     </div>
                     <?php if ($erro): ?><div class="alert alert-danger small"><?= e($erro) ?></div><?php endif; ?>
+                    <?php if ($motivo !== '' && cfg('login_diagnostico', false)): ?>
+                        <div class="alert alert-warning small"><strong>Diagnóstico:</strong> <?= e($motivo) ?></div>
+                    <?php endif; ?>
                     <form method="post" class="user">
                         <?= csrf_campo() ?>
                         <div class="form-group">

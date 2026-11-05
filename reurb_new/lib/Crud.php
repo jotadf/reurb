@@ -373,7 +373,7 @@ class Crud
      * Valida e normaliza os dados enviados pelo formulário.
      * @return array valores prontos para gravar (somente campos editáveis)
      */
-    public function validar(array $entrada, bool $novo): array
+    public function validar(array $entrada, bool $novo, ?array $atual = null): array
     {
         $valores = [];
         $erros   = [];
@@ -404,7 +404,8 @@ class Crud
                     $erros[$nome] = 'A senha deve ter pelo menos 6 caracteres.';
                     continue;
                 }
-                $valores[$nome] = password_hash($v, PASSWORD_DEFAULT);
+                // Mesmo formato que o banco já usa, para não quebrar o login do sistema atual
+                $valores[$nome] = senha_gerar($v, senha_formato_para_gravar($atual[$nome] ?? null));
                 continue;
             }
 
@@ -500,7 +501,7 @@ class Crud
         if ($antes === null) {
             throw new RuntimeException('Registro não encontrado.');
         }
-        $valores = $this->validar($entrada, false);
+        $valores = $this->validar($entrada, false, $antes);
 
         // Grava só o que mudou
         $mudou = [];

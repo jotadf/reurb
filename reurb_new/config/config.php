@@ -47,6 +47,22 @@ return [
     'sessao_nome_usuario' => 'usuario_nome',
     'pagina_login'        => 'login.php',
 
+    // Formato da coluna usuario.senha, usado para gravar E para conferir no login.
+    // 'texto' = sem criptografia (igual ao sistema atual).
+    // 'auto'  = reconhece o formato de cada senha gravada e grava no mesmo formato.
+    // Outros: 'password_hash' | 'md5' | 'sha1' | 'sha256' | 'sha512'
+    'senha_formato' => 'texto',
+
+    // true = ao entrar, converte a senha para password_hash (mais seguro).
+    // Só ligue se o sistema atual também aceitar password_hash, senão o
+    // usuário deixa de conseguir entrar nele.
+    'converter_senha_no_login' => false,
+
+    // true = mostra na tela o motivo exato da falha no login (usuário não
+    // encontrado, inativo, formato da senha...). Use só para diagnosticar e
+    // depois volte para false.
+    'login_diagnostico' => false,
+
     // Links do menu lateral que pertencem a telas que já existem no seu sistema.
     // Troque '#' pelo arquivo correspondente.
     'links_externos' => [

@@ -24,7 +24,23 @@ no mesmo visual da "Ficha de Selagem de Lote".
 4. Login: se o sistema já tem login, informe em `sessao_id_usuario` e
    `sessao_nome_usuario` as chaves de `$_SESSION` que ele usa — o CRUD reaproveita
    a sessão e grava esse ID na auditoria. Senão, use o `login.php` incluído
-   (e-mail ou CPF + senha; senhas antigas em MD5 são convertidas no primeiro acesso).
+   (e-mail ou CPF + senha).
+
+## Senhas
+
+- Configurado como `'senha_formato' => 'texto'`, igual ao sistema atual: a senha é gravada
+  e conferida sem criptografia, com comparação exata (maiúsculas e espaços contam).
+  Na auditoria a senha aparece sempre como `***`.
+- Para mudar depois: `'auto'` reconhece sozinho o formato de cada senha gravada
+  (`password_hash`, MD5, SHA1, SHA256, SHA512 ou texto) e grava no mesmo formato;
+  também dá para fixar um deles, ex.: `'password_hash'`.
+- Se o login falhar, coloque `'login_diagnostico' => true` em `config/config.php`, tente
+  de novo e leia o aviso amarelo: ele diz se o usuário não foi encontrado, está inativo
+  ou se a senha não confere (e qual formato foi reconhecido). O motivo também vai para o
+  log de erros do PHP. Depois volte para `false`.
+- Senha em texto puro ou MD5/SHA sem "sal" é fácil de descobrir se o banco vazar. Quando
+  o sistema atual aceitar `password_hash`, use `'senha_formato' => 'password_hash'` e
+  `'converter_senha_no_login' => true` para migrar as senhas aos poucos, a cada login.
 
 ## Endereços
 
