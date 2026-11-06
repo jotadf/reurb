@@ -16,7 +16,7 @@
         <!-- Divider -->
         <hr class="sidebar-divider">
     <?php
-    if ($usuario_logado->perfil < 2) {
+    if ($usuario_logado->perfil < 1) {
         ?>
         <!-- Heading -->
         <div class="sidebar-heading">
@@ -24,23 +24,29 @@
         </div>      
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="perfis.php">
+            <a class="nav-link collapsed" href="/reurb_new/lista.php?t=perfil">
                 <i class="fa fa-id-card"></i>
                 <span>Perfis</span>
             </a>
         </li>
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="equipes.php">
+            <a class="nav-link collapsed" href="/reurb_new/lista.php?t=equipe">
                 <i class="fa fa-users"></i>
                 <span>Equipes</span>
             </a>
         </li>      
         <!-- Nav Item - Pages Collapse Menu -->
         <li class="nav-item">
-            <a class="nav-link collapsed" href="usuarios.php">
+            <a class="nav-link collapsed" href="/reurb_new/lista.php?t=usuario">
                 <i class="fa fa-user"></i>
                 <span>Usuários</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/reurb_new/lista.php?t=auditoria">
+                <i class="fas fa-fw fa-history"></i> 
+                <span>Auditoria</span>
             </a>
         </li>
    <?php
@@ -74,28 +80,28 @@
     </div>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="selagens.php">
+        <a class="nav-link collapsed" href="/reurb_new/lista.php?t=selagem">
             <i class="fa fa-id-card"></i>
             <span>Selagens</span>
         </a>
     </li>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="domicilios.php">
+        <a class="nav-link collapsed" href="/reurb_new/lista.php?t=domicilios">
             <i class="fa fa-home"></i>
             <span>Domicílios</span>
         </a>
     </li>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="sociojuridicos.php">
+        <a class="nav-link collapsed" href="/reurb_new/lista.php?t=socio">
             <i class="fa fa-balance-scale"></i>
             <span>Sócio jurídicos</span>
         </a>
     </li>
     <!-- Nav Item - Pages Collapse Menu -->
     <li class="nav-item">
-        <a class="nav-link collapsed" href="caracterizacoes.php">
+        <a class="nav-link collapsed" href="/reurb_new/lista.php?t=caracterizacao">
             <i class="fa fa-building"></i>
             <span>Caracterizações</span>
         </a>
