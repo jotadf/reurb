@@ -22,10 +22,10 @@ if($usuario = $db_login->logar($cpf, $senha)){
     $_SESSION['usuario_id']   = (int) $usuario->id;
     $_SESSION['usuario_nome'] = $usuario->nome;
     $_SESSION['usuario'] = serialize($usuario);
-    header('Location: index.php');   
+    header('Location: /reurb_new/index.php');   
     exit; 
 }  else {
-    header('Location: form_login.php?error=1'); 
+    header('Location: /form_login.php?error=1'); 
     exit;
 }
 

@@ -16,7 +16,7 @@
         <!-- Divider -->
         <hr class="sidebar-divider">
     <?php
-    if ($usuario_logado->perfil < 1) {
+    if ($usuario_logado->perfil < 2) {
         ?>
         <!-- Heading -->
         <div class="sidebar-heading">
