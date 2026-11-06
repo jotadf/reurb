@@ -41,4 +41,13 @@ return [
         'selagens_sem_socio' => ['Administrador', 'Usuário', 'Observador'],
         'caract_sem_selagem' => ['Administrador', 'Usuário', 'Observador'],
     ],
+
+    // Páginas próprias do CRUD que não são cadastro (perfis que podem usar cada uma).
+    'paginas' => [
+        // Relatório Geral: ver na tela
+        'relatorio_geral'    => ['Administrador', 'Usuário', 'Observador'],
+        // Relatório Geral: exportar para Excel. A planilha leva nomes, CPFs e rendas;
+        // tire daqui os perfis que não devem levar esses dados para fora do sistema.
+        'relatorio_exportar' => ['Administrador', 'Usuário', 'Observador'],
+    ],
 ];

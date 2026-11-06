@@ -105,6 +105,35 @@ listagem ou pelo aviso vermelho no topo da ficha (`corrigir_vinculo.php`).
   Um selo errado que já estava gravado não impede salvar os outros campos.
 - Configuração: `'corrigir_vinculo'` em `config/tabelas.php`.
 
+## Relatório Geral
+
+Menu **Relatório → Relatório Geral** (`relatorio.php`). Uma linha por domicílio, com os
+dados do lote (selagem) e, quando houver, do cadastro sociojurídico e da caracterização
+ligados pelo selo.
+
+- Lote sem domicílio aparece em uma linha com o domicílio em branco; domicílio cujo lote
+  não existe aparece com o lote em branco.
+- Se um selo tiver mais de um cadastro sociojurídico (ou caracterização), entra o mais
+  recente (maior ID do Kobo) e a situação mostra "2 cadastros".
+- Cadastros com selo que não existe em Domicílios não entram: corrija-os pela tela
+  "Corrigir selo".
+- Filtros: pesquisa (selo, lote, endereço, morador, CPF, titular), rua/setor e situação
+  (completo, com pendência, lote sem domicílio, sem sócio jurídico, sem caracterização,
+  cadastro duplicado, domicílio sem lote). Os botões de totais também filtram.
+- **Exportar para Excel** (`.xlsx`), com os mesmos filtros da tela:
+  - *Resumido*: colunas principais de cada cadastro (cerca de 35);
+  - *Completo*: todas as colunas das quatro tabelas (cerca de 170).
+  A planilha tem cabeçalho agrupado, filtro, primeiras linhas congeladas, números e datas
+  como números e datas do Excel. Não usa bibliotecas externas; precisa da extensão `zip`
+  do PHP. Sem ela, a exportação sai em CSV (o Excel abre normalmente) e a tela avisa.
+- Cada exportação fica na auditoria (tabela `relatorio_geral`, ação `EXPORTAR`, com o
+  modelo, os filtros e o número de linhas), pois a planilha leva nomes, CPFs e rendas.
+- Permissões em `config/permissoes.php`, item `'paginas'`: `relatorio_geral` (ver) e
+  `relatorio_exportar` (baixar a planilha). Hoje os três perfis podem as duas coisas.
+- **Precisa dos índices recomendados** (abaixo). Em teste com 3 mil lotes e 5 mil
+  domicílios, a tela abre em 0,4 s com os índices e em quase 2 minutos sem eles. Se faltar
+  algum, a tela avisa e mostra ao Administrador o comando para criá-lo.
+
 ## Menu lateral
 
 O menu fica em `includes/menu.php`. A estrutura (grupos, itens, ordem, ícones e textos)

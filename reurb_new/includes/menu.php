@@ -29,6 +29,7 @@ require_once dirname(__DIR__) . '/lib/bootstrap.php';
  * Estrutura do menu. Para mudar a ordem, os textos ou os ícones, edite aqui.
  *   ['crud', chave da tela em config/tabelas.php]
  *   ['link', chave em 'links_externos' (config.php), ícone, texto]
+ *   ['pagina', chave em 'paginas' (permissoes.php), arquivo do CRUD, ícone, texto]
  * ------------------------------------------------------------------ */
 $MENU_LATERAL = [
     'Gestão de Acesso' => [
@@ -48,6 +49,7 @@ $MENU_LATERAL = [
         ['crud', 'caracterizacao'],
     ],
     'Relatório' => [
+        ['pagina', 'relatorio_geral', 'relatorio.php', 'fa-table', 'Relatório Geral'],
         ['link', 'gerar_relatorio', 'fa-file-excel', 'Gerar Relatório'],
         ['link', 'selagens_sem_socio', 'fa-file-excel', 'Listagem de Selagens Sem Sócio Jurídico'],
         ['link', 'caract_sem_selagem', 'fa-file-excel', 'Listagem de Caracterizações Sem Selagem'],
@@ -86,6 +88,8 @@ $MENU_LATERAL = [
                         $html .= $item(crud_url(url('lista.php', ['t' => $chave])), $T[$chave]['icone'] ?? 'fa-table',
                                        $i[2] ?? $T[$chave]['titulo'], $ativo === $chave);
                     }
+                } elseif ($i[0] === 'pagina' && pode_pagina($i[1])) {
+                    $html .= $item(crud_url($i[2]), $i[3], $i[4], $ativo === $i[1]);
                 } elseif ($i[0] === 'link' && pode_link_externo($i[1])) {
                     $html .= $item(crud_url($links[$i[1]] ?? '#'), $i[2], $i[3], $ativo === $i[1]);
                 }

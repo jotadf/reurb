@@ -68,6 +68,19 @@ function pode_link_externo(string $chave): bool
     if ($lista === null) {
         return true;
     }
+    return perfil_na_lista($lista);
+}
+
+/** O usuário logado pode usar uma página própria do CRUD ('paginas' em permissoes.php)? */
+function pode_pagina(string $chave): bool
+{
+    $lista = $GLOBALS['PERMISSOES']['paginas'][$chave] ?? [];
+    return perfil_na_lista($lista);
+}
+
+/** O perfil do usuário logado está na lista (por nome, sem acento/maiúscula, ou por ID)? */
+function perfil_na_lista(array $lista): bool
+{
     $u = usuario_atual();
     if ($u === null) {
         return false;

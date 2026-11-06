@@ -87,6 +87,15 @@
 .reurb-lista .col-indicador .badge { font-size: .78rem; padding: .35em .6em; }
 .reurb-sugestoes td, .reurb-sugestoes th { vertical-align: middle; font-size: .88rem; }
 .reurb-sugestoes td:first-child, .reurb-sugestoes .btn { white-space: nowrap; }
+/* Relatório Geral */
+.reurb-relatorio .reurb-rel-grupos th {
+    background: #4e73df; color: #fff; text-align: center; font-size: .78rem;
+    text-transform: uppercase; letter-spacing: .03em; border-color: #3a5ccc;
+}
+.reurb-relatorio td { white-space: nowrap; max-width: 260px; overflow: hidden; text-overflow: ellipsis; }
+.reurb-relatorio td.col-pendencias { white-space: normal; min-width: 170px; max-width: 240px; }
+.reurb-relatorio td.col-pendencias .badge { margin: 1px 0; }
+.reurb-relatorio .card-header .btn-group .btn { white-space: nowrap; }
 .btn-xs { padding: .1rem .4rem; font-size: .72rem; line-height: 1.4; border-radius: .25rem; }
 .reurb-btn-corrigir { vertical-align: baseline; }
 .reurb-pendencias { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; }
