@@ -116,6 +116,11 @@
         Relatório
     </div>    
     <!-- Nav Item - Pages Collapse Menu -->
+     <li class="nav-item">
+        <a class="nav-link" href="/reurb_new/relatorio.php">
+            <i class="fas fa-fw fa-table"></i> <span>Relatório Geral</span>
+        </a>
+    </li>
     <li class="nav-item">
         <a class="nav-link collapsed" href="gerar_busca_periodo.php">
             <i class="fa fa-file-excel"></i>
