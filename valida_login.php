@@ -16,6 +16,11 @@ $senha = isset($_POST["senha"]) ? trim($_POST["senha"]) : FALSE;
 
 ;
 if($usuario = $db_login->logar($cpf, $senha)){
+    // Sessão nova e limpa: nada do usuário anterior pode sobrar
+    $_SESSION = [];
+    session_regenerate_id(true);
+    $_SESSION['usuario_id']   = (int) $usuario->id;
+    $_SESSION['usuario_nome'] = $usuario->nome;
     $_SESSION['usuario'] = serialize($usuario);
     header('Location: index.php');   
     exit; 
