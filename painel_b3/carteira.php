@@ -42,7 +42,7 @@ if ($posicoes) {
     foreach ($posicoes as $p) {
         $s = [];
         foreach ($servico->historico($p['ticker'], $range) as $h) {
-            $s[$h['data']] = (float) $h['fechamento'];
+            $s[$h['data']] = (float) ($h['fechamento_ajustado'] ?? $h['fechamento']);
         }
         if (count($s) >= 2) {
             $series[$p['ticker']] = $s;
@@ -209,8 +209,9 @@ include './layout_topo.php';
                     <div class="col"><div class="text-xs text-uppercase text-gray-500 font-weight-bold">Queda máxima</div><div class="kpi-valor text-danger"><?= pct($evolucao['mdd'], 1, true) ?></div></div>
                 </div>
                 <div class="grafico grafico-md"><canvas id="graficoEvolucao"></canvas></div>
-                <div class="small text-gray-500 mt-2">Simula quanto valeria a carteira de hoje, com as mesmas quantidades, em cada dia do período (preços sem ajuste de proventos).
-                    <?= $evolucao['parcial'] ? 'Alguns ativos ficaram de fora por falta de histórico.' : '' ?></div>
+                <div class="small text-gray-500 mt-2">Simula quanto valeria a carteira de hoje, com as mesmas quantidades, em cada dia do período (preços ajustados por proventos e desdobramentos).
+                    <?= $evolucao['parcial'] ? 'Alguns ativos ficaram de fora por falta de histórico.' : '' ?>
+                    <?= ($d = ServicoMercado::periodoIncompleto($range, $evolucao['datas'][0])) ? 'Histórico disponível a partir de ' . data_br($d) . '.' : '' ?></div>
             </div>
         </div>
         <?php } ?>

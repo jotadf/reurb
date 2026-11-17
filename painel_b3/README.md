@@ -50,21 +50,61 @@ As páginas consultam a API sozinhas quando o cache vence. Para deixar tudo pron
 de alguém abrir o painel, agende no cron do servidor (ou em “Tarefas Cron” do cPanel):
 
 ```
-0,15,30,45 10-18 * * 1-5  php /caminho/painel-b3/cron/atualizar_cotacoes.php
+0,30 10-18 * * 1-5        php /caminho/painel-b3/cron/atualizar_cotacoes.php
 30 19 * * 1-5             php /caminho/painel-b3/cron/atualizar_cotacoes.php --historico
 ```
 
+## Histórico oficial da B3 (Séries Históricas - COTAHIST)
+
+A B3 publica gratuitamente arquivos com o histórico diário de todos os ativos à vista, incluindo
+FIIs, desde 1986. O painel importa esses arquivos e grava somente os ativos da lista de
+acompanhamento e das carteiras. Com isso, os períodos de 6 meses a 10 anos funcionam mesmo
+no plano gratuito da brapi, que entrega só 3 meses.
+
+```
+# 1) Carga inicial (uma vez): baixa os arquivos anuais
+php cron/importar_cotahist.php --anos=2016-2026
+
+# 2) Todo dia útil à noite: baixa os arquivos diários ainda não importados
+0 21 * * 1-5  php /caminho/painel-b3/cron/importar_cotahist.php --diario
+
+# Alternativa: arquivo baixado manualmente no site da B3 (.ZIP ou .TXT)
+php cron/importar_cotahist.php --arquivo=/caminho/COTAHIST_A2024.ZIP
+```
+
+- Depois de incluir um ativo novo na lista, rode de novo o `--anos` para trazer o passado dele.
+- **Instalação já existente:** execute uma vez `database/atualizacao_cotahist.sql` antes de usar.
+- Os arquivos da B3 trazem preços nominais. Depois de cada importação, o painel recalcula o
+  **preço ajustado** usando os proventos da brapi e detectando desdobramentos e grupamentos
+  (mudança de patamar numa proporção redonda, como 1:2 ou 10:1, já na abertura). As detecções
+  aparecem na saída do comando, para conferência. Proventos antigos que a brapi não informar
+  não entram no ajuste, então o retorno de períodos longos pode ficar um pouco subestimado.
+- Nas datas cobertas pela B3, os dados oficiais prevalecem sobre os da API.
+- Os gráficos de preço e os indicadores usam a série ajustada; a cotação do topo é a nominal.
+- Endereço de download: `b3.url_base` em `config.php`. Se o servidor da B3 recusar a conexão por
+  certificado SSL, defina `'verificar_ssl' => false` ou baixe os arquivos manualmente.
+- O índice Ibovespa não faz parte desses arquivos; o histórico dele continua vindo da brapi.
+
 ## Plano gratuito da brapi: o que muda
 
-- As cotações chegam com atraso (15 minutos no plano gratuito, segundo a brapi).
-- Há limite mensal de requisições. O painel guarda tudo no MySQL e só consulta a API quando
-  o cache vence (`cache.cotacao_minutos` = 15 e `cache.historico_minutos` = 360 por padrão).
-  O consumo do mês aparece na visão geral.
-- O plano gratuito consulta um ativo por requisição; o painel faz as chamadas em paralelo.
-  Em plano pago, ative `varios_ativos_por_requisicao` em `config.php`.
-- Alguns períodos (ex.: 2 ou 5 anos) podem não estar liberados no seu plano. Se aparecer erro
-  ao escolher um período, remova-o de `analise.ranges` em `config.php`. Como o histórico fica
-  acumulado no banco, a série diária cresce com o uso e com o cron `--historico`.
+Segundo a brapi, o plano gratuito tem até 15.000 requisições por mês, 1 ativo por requisição,
+histórico dos últimos 3 meses e dados atualizados a cada 30 minutos. O painel já vem ajustado
+para isso:
+
+- **Cache de 30 minutos no pregão** (`cache.cotacao_minutos`) e de 120 minutos fora dele
+  (`cache.cotacao_minutos_fora_pregao`). Um cache menor que a atualização da própria API não
+  traz preço mais novo. Em plano pago (15 min ou menos), reduza o valor.
+- **Consumo estimado** (1 requisição por ativo, ~9 h de pregão, 22 dias): com cache de 30 min,
+  cerca de 400 requisições por ativo/mês, o que comporta uns 35 ativos (contando o Ibovespa e os
+  ativos das carteiras). O consumo do mês aparece na visão geral. Feriados não são detectados;
+  nesses dias o painel apenas consulta um pouco mais.
+- **Histórico:** a API é consultada no máximo até `brapi.range_maximo` (`3mo` no gratuito).
+  Os períodos maiores (6 meses a 10 anos) usam o histórico guardado no MySQL, importado da B3
+  (seção acima) e acumulado a cada pregão. Enquanto o período não estiver completo, a tela avisa desde quando há dados.
+  Para acumular sem depender de alguém abrir o painel, agende o cron `--historico` (abaixo).
+  Em plano pago, aumente `brapi.range_maximo` (ex.: `1y` ou `5y`) e os períodos longos ficam
+  completos na primeira consulta.
+- Em plano pago, ative também `varios_ativos_por_requisicao` em `config.php`.
 - Sem token, a brapi só responde PETR4, VALE3, MGLU3 e ITUB4.
 
 ## Estrutura
@@ -81,9 +121,10 @@ painel-b3/
 │   ├── Login.php, ManterUsuario.php, ManterAtivo.php, ManterCarteira.php
 │   ├── BrapiClient.php     chamadas à API com curl_multi e registro em api_log
 │   ├── ServicoMercado.php  regras de cache, gravação de cotações, histórico e proventos
+│   ├── ImportadorCotahist.php  leitura dos arquivos da B3 e cálculo do preço ajustado
 │   └── Analise.php         retornos, volatilidade, drawdown, Sharpe, beta, médias, IFR, MACD, Bollinger, correlação
 ├── dto/                    Usuario, Ativo, Posicao
-├── cron/atualizar_cotacoes.php
+├── cron/atualizar_cotacoes.php, cron/importar_cotahist.php
 ├── config/config.php       credenciais (bloqueado para acesso web pelo .htaccess)
 ├── database/schema.sql
 ├── css/ (sb-admin-2 do REURB + painel.css), js/ (sb-admin-2 + painel.js), vendor/, img/

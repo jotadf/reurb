@@ -24,18 +24,44 @@ return [
         'timeout'  => 15,
         // Plano gratuito: 1 ativo por requisição. Em planos pagos pode ser true.
         'varios_ativos_por_requisicao' => false,
+        // Maior período de histórico que o seu plano libera na API.
+        // Gratuito: '3mo'. Planos pagos: '1y', '5y', '10y'...
+        // Períodos maiores que este são montados com o histórico acumulado no banco.
+        'range_maximo' => '3mo',
+    ],
+
+    // ---------------- Séries Históricas da B3 (COTAHIST) ----------------
+    // Arquivos oficiais e gratuitos com o histórico diário. Importados por cron/importar_cotahist.php.
+    'b3' => [
+        'url_base'      => getenv('PAINELB3_B3_URL') ?: 'https://bvmf.bmfbovespa.com.br/InstDados/SerHist/',
+        // Se o download falhar por erro de certificado SSL no servidor da B3, troque para false
+        // (ou baixe o arquivo manualmente e use a opção --arquivo).
+        'verificar_ssl' => true,
     ],
 
     // ---------------- Cache (economiza requisições da API) ----------------
     'cache' => [
-        'cotacao_minutos'   => 15,   // idade máxima da cotação antes de consultar a API de novo
-        'historico_minutos' => 360,  // idade máxima do histórico diário
+        // Idade máxima da cotação durante o pregão. O plano gratuito da brapi atualiza
+        // os dados a cada 30 min (planos pagos: 15 min ou menos), então um cache menor
+        // que isso não traz preço mais novo e só consome requisições.
+        'cotacao_minutos'             => 30,
+        // Fora do pregão o preço não muda, então o cache pode ser bem mais longo.
+        'cotacao_minutos_fora_pregao' => 120,
+        'historico_minutos'           => 360,  // idade máxima do histórico diário
+    ],
+
+    // Horário do pregão da B3 (horário de Brasília), usado para decidir o cache.
+    'pregao' => [
+        'dias'   => [1, 2, 3, 4, 5],   // 1 = segunda ... 5 = sexta
+        'inicio' => '10:00',
+        'fim'    => '18:30',
     ],
 
     // ---------------- Análises ----------------
     'analise' => [
-        // Intervalos oferecidos na tela. Remova os que o seu plano da brapi não permite.
-        'ranges' => ['1mo' => '1 mês', '3mo' => '3 meses', '6mo' => '6 meses', '1y' => '1 ano', '2y' => '2 anos', '5y' => '5 anos'],
+        // Períodos oferecidos na tela. Os que passam de brapi.range_maximo usam o histórico
+        // guardado no banco (importado da B3 com cron/importar_cotahist.php e acumulado a cada dia).
+        'ranges' => ['1mo' => '1 mês', '3mo' => '3 meses', '6mo' => '6 meses', '1y' => '1 ano', '2y' => '2 anos', '5y' => '5 anos', '10y' => '10 anos'],
         'range_padrao' => '3mo',
         // Taxa livre de risco anual usada no índice de Sharpe (ex.: CDI). Atualize periodicamente.
         'taxa_livre_risco_anual' => 0.15,

@@ -140,6 +140,10 @@ include './layout_topo.php';
 <?php if ($semDados) { ?>
     <div class="alert alert-secondary small">Sem histórico suficiente para: <strong><?= e(implode(', ', $semDados)) ?></strong>.</div>
 <?php } ?>
+<?php if ($series && ($desde = ServicoMercado::periodoIncompleto($range, reset($alinhado['datas'])))) { ?>
+    <div class="alert alert-info small"><i class="fas fa-history mr-1"></i>Histórico disponível no banco a partir de <strong><?= data_br($desde) ?></strong>.
+        O período escolhido vai ficando completo à medida que os pregões são acumulados.</div>
+<?php } ?>
 <?php if ($poucasDatas) { ?>
     <div class="alert alert-warning small">Os ativos têm poucas datas em comum no período, então as métricas podem não ser representativas.</div>
 <?php } ?>

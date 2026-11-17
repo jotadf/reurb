@@ -33,7 +33,7 @@ class ServicoMercado extends Model
             return [];
         }
         $atuais  = $this->lerCotacoes($tickers);
-        $ttl     = (int) config('cache.cotacao_minutos') * 60;
+        $ttl     = minutos_cache_cotacao() * 60;
         $vencidos = [];
         foreach ($tickers as $t) {
             if ($forcar || empty($atuais[$t]) || (time() - strtotime($atuais[$t]['atualizado_em'])) > $ttl) {
@@ -128,10 +128,12 @@ class ServicoMercado extends Model
         $range = array_key_exists($range, config('analise.ranges') ?: []) || in_array($range, ['ytd', 'max'], true)
             ? $range : config('analise.range_padrao');
 
-        $sync = $this->um('SELECT atualizado_em FROM api_sync WHERE ticker=? AND tipo=? AND faixa=?', [$ticker, 'historico', $range]);
+        // A API só é consultada até o limite do plano; o restante vem do banco.
+        $rangeApi = self::limitaRange($range);
+        $sync = $this->um('SELECT atualizado_em FROM api_sync WHERE ticker=? AND tipo=? AND faixa=?', [$ticker, 'historico', $rangeApi]);
         $ttl  = (int) config('cache.historico_minutos') * 60;
         if ($forcar || !$sync || (time() - strtotime($sync['atualizado_em'])) > $ttl) {
-            $this->atualizaHistorico([$ticker], $range);
+            $this->atualizaHistorico([$ticker], $rangeApi);
         }
         $inicio = self::inicioDoPeriodo($range);
         $sql = 'SELECT data, abertura, maxima, minima, fechamento, fechamento_ajustado, volume
@@ -142,6 +144,7 @@ class ServicoMercado extends Model
     /** Busca histórico + dividendos de vários ativos na API e grava no banco. */
     public function atualizaHistorico(array $tickers, $range)
     {
+        $range = self::limitaRange($range);
         $res = $this->api->cotacoes($tickers, ['range' => $range, 'interval' => '1d', 'dividends' => 'true']);
         foreach ($res as $t => $r) {
             if (isset($r['erro'])) {
@@ -164,8 +167,13 @@ class ServicoMercado extends Model
         $st = $this->db->prepare(
             'INSERT INTO historico_preco (ticker, data, abertura, maxima, minima, fechamento, fechamento_ajustado, volume)
              VALUES (?,?,?,?,?,?,?,?)
-             ON DUPLICATE KEY UPDATE abertura=VALUES(abertura), maxima=VALUES(maxima), minima=VALUES(minima),
-                fechamento=VALUES(fechamento), fechamento_ajustado=VALUES(fechamento_ajustado), volume=VALUES(volume)'
+             ON DUPLICATE KEY UPDATE
+                abertura            = IF(fonte = \'b3\', abertura, VALUES(abertura)),
+                maxima              = IF(fonte = \'b3\', maxima, VALUES(maxima)),
+                minima              = IF(fonte = \'b3\', minima, VALUES(minima)),
+                fechamento          = IF(fonte = \'b3\', fechamento, VALUES(fechamento)),
+                fechamento_ajustado = IF(fonte = \'b3\', fechamento_ajustado, VALUES(fechamento_ajustado)),
+                volume              = IF(fonte = \'b3\', volume, VALUES(volume))'
         );
         $this->db->beginTransaction();
         try {
@@ -173,9 +181,13 @@ class ServicoMercado extends Model
                 if (!isset($p['date'], $p['close']) || !is_numeric($p['close'])) {
                     continue;
                 }
-                $ts = is_numeric($p['date']) ? (int) $p['date'] : strtotime($p['date']);
+                // Data do pregão em UTC: evita que um horário 00:00 UTC vire o dia anterior no fuso de Brasília
+                $dia = is_numeric($p['date']) ? gmdate('Y-m-d', (int) $p['date']) : substr((string) $p['date'], 0, 10);
+                if ((int) date('N', strtotime($dia)) >= 6) {
+                    continue; // não há pregão em fim de semana
+                }
                 $st->execute([
-                    $ticker, date('Y-m-d', $ts),
+                    $ticker, $dia,
                     $p['open'] ?? null, $p['high'] ?? null, $p['low'] ?? null,
                     $p['close'], $p['adjustedClose'] ?? $p['close'],
                     isset($p['volume']) ? (int) $p['volume'] : null,
@@ -245,6 +257,53 @@ class ServicoMercado extends Model
     {
         $r = $this->um('SELECT MAX(atualizado_em) m FROM cotacao');
         return $r['m'] ?? null;
+    }
+
+    /** Primeira data de histórico guardada no banco para o ticker. */
+    public function inicioHistorico($ticker)
+    {
+        $r = $this->um('SELECT MIN(data) d FROM historico_preco WHERE ticker = ?', [$ticker]);
+        return $r['d'] ?? null;
+    }
+
+    /** Cobertura do histórico por ticker: ticker => [inicio, fim, pregoes, b3]. */
+    public function coberturaHistorico()
+    {
+        $mapa = [];
+        foreach ($this->todos("SELECT ticker, MIN(data) inicio, MAX(data) fim, COUNT(*) pregoes, SUM(fonte = 'b3') b3
+                                 FROM historico_preco GROUP BY ticker") as $l) {
+            $mapa[$l['ticker']] = $l;
+        }
+        return $mapa;
+    }
+
+    /** Ordem dos períodos aceitos pela brapi, do menor para o maior. */
+    const ORDEM_RANGES = ['1d', '2d', '5d', '7d', '1mo', '3mo', '6mo', 'ytd', '1y', '2y', '5y', '10y', 'max'];
+
+    /** Reduz o período ao máximo liberado pelo plano (brapi.range_maximo). */
+    public static function limitaRange($range)
+    {
+        $max = config('brapi.range_maximo') ?: '3mo';
+        $iR = array_search($range, self::ORDEM_RANGES, true);
+        $iM = array_search($max, self::ORDEM_RANGES, true);
+        if ($iR === false) {
+            return $max;
+        }
+        return ($iM !== false && $iR > $iM) ? $max : $range;
+    }
+
+    /**
+     * Aviso quando o banco ainda não tem histórico cobrindo todo o período pedido.
+     * Retorna a data inicial disponível, ou null se o período está completo.
+     */
+    public static function periodoIncompleto($range, $primeiraData)
+    {
+        $inicio = self::inicioDoPeriodo($range);
+        if (!$inicio || !$primeiraData) {
+            return null;
+        }
+        // tolera feriados e fins de semana no começo do período
+        return strtotime($primeiraData) > strtotime($inicio . ' +7 days') ? $primeiraData : null;
     }
 
     /** Data inicial correspondente a um range da brapi (null = sem limite). */

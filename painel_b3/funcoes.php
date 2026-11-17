@@ -27,6 +27,23 @@ function config($chave = null)
     return $valor;
 }
 
+/** Indica se agora é horário de pregão (dias úteis, sem considerar feriados). */
+function em_pregao($ts = null)
+{
+    $ts = $ts ?? time();
+    $p = config('pregao') ?: ['dias' => [1, 2, 3, 4, 5], 'inicio' => '10:00', 'fim' => '18:30'];
+    $hora = date('H:i', $ts);
+    return in_array((int) date('N', $ts), $p['dias'], true) && $hora >= $p['inicio'] && $hora <= $p['fim'];
+}
+
+/** Validade do cache de cotações em minutos, conforme o horário. */
+function minutos_cache_cotacao()
+{
+    return em_pregao()
+        ? (int) (config('cache.cotacao_minutos') ?: 5)
+        : (int) (config('cache.cotacao_minutos_fora_pregao') ?: 120);
+}
+
 /** Escapa texto para HTML. */
 function e($valor)
 {

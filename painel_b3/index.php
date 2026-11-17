@@ -241,7 +241,7 @@ include './layout_topo.php';
         <div class="small text-gray-600 mb-4">
             <i class="fas fa-info-circle mr-1"></i>
             Requisições à brapi neste mês: <strong><?= numero($requisicoes, 0) ?></strong>.
-            Cotações ficam em cache por <?= (int) config('cache.cotacao_minutos') ?> min.
+            <?= em_pregao() ? 'Pregão aberto' : 'Pregão fechado' ?>: cotações ficam em cache por <?= minutos_cache_cotacao() ?> min.
         </div>
     </div>
 </div>

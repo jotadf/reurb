@@ -5,6 +5,7 @@ require_once './actions/ServicoMercado.php';
 
 $lista = (new ManterAtivo())->listar(false);
 $admin = $usuario_logado->perfil <= 1;
+$cobertura = (new ServicoMercado())->coberturaHistorico();
 
 $titulo = 'Ativos monitorados';
 include './layout_topo.php';
@@ -56,7 +57,7 @@ include './layout_topo.php';
         $admin ? '<button id="btn_cadastrar" class="btn btn-outline-light btn-sm" type="button" title="Novo ativo"><i class="fa fa-plus-circle text-white"></i></button>' : '') ?>
     <div class="card-body">
         <table id="tabelaAtivos" class="table table-sm table-striped table-bordered dt-responsive nowrap" style="width:100%">
-            <thead><tr><th style="width:8%">Ordem</th><th>Código</th><th>Nome</th><th>Setor</th><th>Situação</th><th style="width:15%">Opções</th></tr></thead>
+            <thead><tr><th style="width:8%">Ordem</th><th>Código</th><th>Nome</th><th>Setor</th><th>Histórico no banco</th><th>Situação</th><th style="width:15%">Opções</th></tr></thead>
             <tbody>
             <?php foreach ($lista as $a) { ?>
                 <tr>
@@ -64,6 +65,13 @@ include './layout_topo.php';
                     <td><a class="ticker" href="ativo.php?t=<?= e(rawurlencode($a['ticker'])) ?>"><?= e($a['ticker']) ?></a></td>
                     <td><?= e($a['nome']) ?></td>
                     <td><?= e($a['setor']) ?></td>
+                    <?php $cb = $cobertura[$a['ticker']] ?? null; ?>
+                    <td data-order="<?= e($cb['inicio'] ?? '9999') ?>">
+                        <?php if ($cb) { ?>
+                            <?= data_br($cb['inicio']) ?> a <?= data_br($cb['fim']) ?>
+                            <div class="small text-gray-500"><?= numero($cb['pregoes'], 0) ?> pregões<?= $cb['b3'] > 0 ? ' &middot; ' . numero($cb['b3'], 0) . ' da B3' : '' ?></div>
+                        <?php } else { echo '<span class="text-gray-500">—</span>'; } ?>
+                    </td>
                     <td><?= $a['ativo'] ? '<span class="badge badge-success">Monitorado</span>' : '<span class="badge badge-secondary">Pausado</span>' ?></td>
                     <td class="text-nowrap">
                         <a class="btn btn-sm btn-outline-primary" href="ativo.php?t=<?= e(rawurlencode($a['ticker'])) ?>" title="Analisar"><i class="fas fa-chart-area"></i></a>
@@ -80,6 +88,8 @@ include './layout_topo.php';
             </tbody>
         </table>
         <?php if (!$admin) { ?><div class="small text-gray-500 mt-2">Somente administradores alteram a lista.</div><?php } ?>
+        <div class="small text-gray-500 mt-2"><i class="fas fa-history mr-1"></i>Para trazer anos de histórico de um ativo recém-incluído, rode no servidor:
+            <code>php cron/importar_cotahist.php --anos=<?= date('Y') - 5 ?>-<?= date('Y') ?></code> (dados oficiais e gratuitos da B3).</div>
     </div>
 </div>
 

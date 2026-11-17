@@ -1,8 +1,8 @@
 <?php
 /**
  * Atualização automática (agende no cron do servidor ou no cPanel).
- * Exemplo, a cada 15 minutos em dias úteis, das 10h às 18h:
- *   0,15,30,45 10-18 * * 1-5  php /caminho/painel-b3/cron/atualizar_cotacoes.php
+ * Exemplo, a cada 30 minutos em dias úteis, das 10h às 18h:
+ *   0,30 10-18 * * 1-5  php /caminho/painel-b3/cron/atualizar_cotacoes.php
  * Uma vez por dia, depois do fechamento, use "--historico" para gravar o pregão:
  *   30 19 * * 1-5  php /caminho/painel-b3/cron/atualizar_cotacoes.php --historico
  */
@@ -26,7 +26,7 @@ $tickers = array_values(array_unique($tickers));
 
 $inicio = microtime(true);
 if (in_array('--historico', $argv, true)) {
-    $servico->atualizaHistorico($tickers, config('analise.range_padrao'));
+    $servico->atualizaHistorico($tickers, config('brapi.range_maximo') ?: '3mo');
     $tipo = 'histórico';
 } else {
     $servico->cotacoes($tickers, true);

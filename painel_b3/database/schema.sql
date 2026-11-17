@@ -89,7 +89,15 @@ CREATE TABLE IF NOT EXISTS historico_preco (
     fechamento           DECIMAL(18,4) NOT NULL,
     fechamento_ajustado  DECIMAL(18,4) NULL,
     volume               BIGINT        NULL,
+    fonte                VARCHAR(8)    NOT NULL DEFAULT 'brapi',   -- brapi | b3 (COTAHIST)
     PRIMARY KEY (ticker, data)
+) ENGINE=InnoDB;
+
+-- Arquivos COTAHIST da B3 já importados
+CREATE TABLE IF NOT EXISTS cotahist_arquivo (
+    nome           VARCHAR(40) NOT NULL PRIMARY KEY,
+    registros      INT         NOT NULL DEFAULT 0,
+    processado_em  DATETIME    NOT NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS dividendo (

@@ -22,13 +22,18 @@ $naLista = in_array($ticker, array_column($lista, 'ticker'), true);
 
 // ---------------- Séries ----------------
 $datas = $abert = $max = $min = $fech = $ajust = $vol = [];
+// Gráficos e indicadores usam preços ajustados por proventos e desdobramentos,
+// para que eventos societários não apareçam como quedas ou saltos de preço.
 foreach ($hist as $h) {
+    $c = (float) $h['fechamento'];
+    $a = (float) ($h['fechamento_ajustado'] ?? $c);
+    $f = $c > 0 ? $a / $c : 1.0;
     $datas[] = $h['data'];
-    $abert[] = $h['abertura'] !== null ? (float) $h['abertura'] : (float) $h['fechamento'];
-    $max[]   = $h['maxima'] !== null ? (float) $h['maxima'] : (float) $h['fechamento'];
-    $min[]   = $h['minima'] !== null ? (float) $h['minima'] : (float) $h['fechamento'];
-    $fech[]  = (float) $h['fechamento'];
-    $ajust[] = (float) ($h['fechamento_ajustado'] ?? $h['fechamento']);
+    $abert[] = round(($h['abertura'] !== null ? (float) $h['abertura'] : $c) * $f, 4);
+    $max[]   = round(($h['maxima'] !== null ? (float) $h['maxima'] : $c) * $f, 4);
+    $min[]   = round(($h['minima'] !== null ? (float) $h['minima'] : $c) * $f, 4);
+    $fech[]  = round($a, 4);
+    $ajust[] = $a;
     $vol[]   = (int) $h['volume'];
 }
 $temDados = count($fech) >= 2;
@@ -161,6 +166,12 @@ include './layout_topo.php';
 </div>
 
 <?= alerta_erros_api($servico->erros) ?>
+<?php if ($temDados && ($desde = ServicoMercado::periodoIncompleto($range, $datas[0]))) { ?>
+    <div class="alert alert-info aviso-api"><i class="fas fa-history mr-1"></i>
+        O banco tem histórico de <?= e($ticker) ?> desde <strong><?= data_br($desde) ?></strong>; os indicadores abaixo consideram só esse trecho.
+        Para completar o período, importe o histórico oficial da B3 no servidor:
+        <code>php cron/importar_cotahist.php --anos=<?= date('Y') - 5 ?>-<?= date('Y') ?></code>.</div>
+<?php } ?>
 
 <?php if (!$temDados) { ?>
     <div class="card border-left-warning shadow mb-4"><div class="card-body">
@@ -196,7 +207,7 @@ include './layout_topo.php';
     <!-- Gráfico principal -->
     <div class="col-xl-9 col-lg-8">
         <div class="card mb-4 border-primary shadow">
-            <?= card_cabecalho('fas fa-chart-line', 'Preço &middot; ' . e($ranges[$range]),
+            <?= card_cabecalho('fas fa-chart-line', 'Preço ajustado &middot; ' . e($ranges[$range]),
                 '<div class="btn-group btn-group-sm btn-group-toggle" data-toggle="buttons">'
                 . '<label class="btn btn-outline-light active"><input type="radio" name="tipoGrafico" value="linha" checked> Linha</label>'
                 . '<label class="btn btn-outline-light"><input type="radio" name="tipoGrafico" value="candle"> Candles</label></div>') ?>
