@@ -1,0 +1,6 @@
+Options -Indexes
+DirectoryIndex index.php
+
+<FilesMatch "^(funcoes|head|menu|top_bar|rodape|layout_topo|layout_base)\.php$">
+    Require all denied
+</FilesMatch>

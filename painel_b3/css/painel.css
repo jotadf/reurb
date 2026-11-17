@@ -1,0 +1,36 @@
+/* Ajustes do Painel B3 sobre o tema SB Admin 2 (mesma base visual do REURB) */
+body { font-size: small; }
+
+.card-header.bg-gradient-primary .h5,
+.card-header.bg-gradient-primary .h6 { color: #fff; }
+.card-titulo-icone { width: 42px; }
+
+.logo-ativo { width: 28px; height: 28px; border-radius: 6px; object-fit: contain; background: #fff; border: 1px solid #e3e6f0; }
+.logo-ativo-lg { width: 56px; height: 56px; border-radius: 10px; }
+.logo-placeholder { display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: 10px; color: #4e73df; background: #eaecf4; }
+
+.ticker { font-weight: 800; color: #3a3b45; letter-spacing: .02em; }
+.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.num, th.num { text-align: right; }
+
+/* Barra de posição dentro da faixa de 52 semanas */
+.faixa52 { position: relative; height: 6px; background: #eaecf4; border-radius: 3px; min-width: 90px; }
+.faixa52 .marcador { position: absolute; top: -3px; width: 4px; height: 12px; margin-left: -2px; background: #4e73df; border-radius: 2px; }
+
+/* Matriz de correlação */
+.tabela-corr td, .tabela-corr th { text-align: center; padding: .45rem .6rem; }
+.tabela-corr td { font-weight: 700; color: #3a3b45; }
+
+.grafico { position: relative; width: 100%; }
+.grafico-lg { height: 380px; }
+.grafico-md { height: 260px; }
+.grafico-sm { height: 160px; }
+
+.kpi-valor { font-size: 1.25rem; font-weight: 700; color: #5a5c69; }
+.badge-sinal { font-size: 75%; }
+.btn-group-toggle .btn { font-size: .75rem; }
+.aviso-api { font-size: .8rem; }
+
+@media (max-width: 576px) {
+    .grafico-lg { height: 280px; }
+}
